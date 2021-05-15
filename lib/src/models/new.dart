@@ -1,4 +1,13 @@
 class New {
+  final String id;
+  final bool featured;
+  final String title;
+  final String url;
+  final String imageUrl;
+  final String newsSite;
+  final String summary;
+  final DateTime publishedAt;
+
   New({
     required this.id,
     required this.featured,
@@ -9,15 +18,6 @@ class New {
     required this.summary,
     required this.publishedAt,
   });
-
-  final String id;
-  final bool featured;
-  final String title;
-  final String url;
-  final String imageUrl;
-  final String newsSite;
-  final String summary;
-  final DateTime publishedAt;
 
   factory New.fromJson(Map<String, dynamic> json) => New(
         id: json["id"],

@@ -13,15 +13,19 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.17.0
+
   dio: ^4.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
+
 flutter:
-
-
+  generate: true
   uses-material-design: false
 
   # To add assets to your application, add an assets section, like this:

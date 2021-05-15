@@ -19,7 +19,6 @@ class SpaceflightApi {
 
   Future<List<New>?> articles() async {
     try {
-      print('called articles');
       final response = await _client.get('articles');
       if (response.statusCode == 200) {
         final decodedArticles = response.data as List;

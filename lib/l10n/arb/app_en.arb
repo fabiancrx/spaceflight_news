@@ -1,0 +1,18 @@
+{
+  "@@locale": "en",
+  "appTitle": "Spaceflight News",
+  "favorites": "Favorites",
+  "feed": "Feed",
+
+  "noNewsYet": "There are no news yet",
+  "newsFeed": "News feed",
+
+  "favoriteArticles": "Favorite articles",
+  "favoritesNoResults": "You don't have favorites yet.",
+  "favoriteTapOnThe": "Tap on the",
+  "favoriteToMarkAnItemAsFavorite": "to mark an article as a favorite.",
+
+  "search": "Search",
+  "searchNoResults": "There are no results for this search.",
+  "searchAnotherWord": "Try searching another word."
+}

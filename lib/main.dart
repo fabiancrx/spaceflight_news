@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:spaceflight_news/src/api/spaceflight_api.dart';
 import 'package:spaceflight_news/src/environment.dart';
 import 'package:spaceflight_news/src/models/new.dart';
-import 'package:spaceflight_news/src/ui/no_data.dart';
+import 'package:spaceflight_news/src/shared/extensions.dart';
+import 'package:spaceflight_news/src/widget/no_data.dart';
 
 import 'resources/resources.dart';
 
@@ -14,7 +16,11 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: 'Spaceflight News', home: NewsFeed());
+    return MaterialApp(
+        onGenerateTitle: (BuildContext context) => context.l10n.appTitle,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: NewsFeed());
   }
 }
 
@@ -27,7 +33,7 @@ class NewsFeed extends StatefulWidget {
 
 class _NewsFeedState extends State<NewsFeed> {
   late Future<List<New>?> _newsFuture =
-  SpaceflightApi(environment: Environment.testing()).articles();
+      SpaceflightApi(environment: Environment.testing()).articles();
 
   @override
   Widget build(BuildContext context) {
@@ -38,26 +44,28 @@ class _NewsFeedState extends State<NewsFeed> {
           if (snapshot.hasData) {
             var news = snapshot.data;
             if (news == null || news.isEmpty) {
-              return _noNews();
+              return _noNews(context);
             }
             return ListView.builder(
-                itemCount: news.length, itemBuilder: (context, i) {
-              return NewsItem(news: news[i]);
-            });
+                itemCount: news.length,
+                itemBuilder: (context, i) {
+                  return NewsItem(news: news[i]);
+                });
           } else if (snapshot.hasError) {
-            return Center(child: Text(snapshot.error.toString()),);
+            return Center(
+              child: Text(snapshot.error.toString()),
+            );
           }
 
-          return _noNews();
+          return _noNews(context);
         },
       ),
     );
   }
 }
 
-Widget _noNews() =>
-    NoData(image: AssetImage(AssetIcon.news),
-        message: 'There are no news yet');
+Widget _noNews(BuildContext context) =>
+    NoData(image: AssetImage(AssetIcon.news), message: context.l10n.noNewsYet);
 
 class NewsItem extends StatelessWidget {
   final New news;
@@ -68,9 +76,8 @@ class NewsItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(news.title),
-      subtitle: Text(news.publishedAt.toIso8601String()),
-      // leading: Image.network(news.imageUrl),
-
+      subtitle: Text(news.publishedAt.formatYmmmmd()),
+      leading: Image.network(news.imageUrl),
     );
   }
 }

@@ -16,7 +16,7 @@ void main() {
     });
   });
 }
-//  https://spaceflightnewsapi.net/api/v2/articles/{id}
+//  https://spaceflightnewsapi.net/api/v2/articles
 const _newsJson = """
   {
     "id": "string",
