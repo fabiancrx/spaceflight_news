@@ -7,6 +7,7 @@ import 'package:spaceflight_news/src/shared/extensions.dart';
 import 'package:spaceflight_news/src/widget/no_data.dart';
 
 import 'resources/resources.dart';
+import 'src/news/news_card.dart';
 
 void main() {
   runApp(MyApp());
@@ -33,11 +34,36 @@ class NewsFeed extends StatefulWidget {
 
 class _NewsFeedState extends State<NewsFeed> {
   late Future<List<New>?> _newsFuture =
-      SpaceflightApi(environment: Environment.testing()).articles();
+      SpaceflightApi(environment: Environment.production()).articles();
+  var _bottomBarIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: BottomNavigationBar(
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: context.l10n.feed,
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: context.l10n.favorites,
+          ),
+        ],
+        currentIndex: _bottomBarIndex,
+        onTap: (i) {
+          setState(() {
+            _bottomBarIndex = i;
+          });
+        },
+      ),
+      appBar: AppBar(
+        title: Text(context.l10n.feed),
+        centerTitle: false,
+        elevation: 0,
+        actions: [Image.asset(AssetIcon.search)],
+      ),
       body: FutureBuilder<List<New>?>(
         future: _newsFuture,
         builder: (context, snapshot) {
@@ -46,11 +72,18 @@ class _NewsFeedState extends State<NewsFeed> {
             if (news == null || news.isEmpty) {
               return _noNews(context);
             }
-            return ListView.builder(
-                itemCount: news.length,
-                itemBuilder: (context, i) {
-                  return NewsItem(news: news[i]);
-                });
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: ListView(
+                children: [
+                  NewsHeader(),
+                  for (var i = 0; i < news.length; i++) ...[
+                    if (i > 0) const SizedBox(height: 16),
+                    NewsCard(news: news[i]),
+                  ],
+                ],
+              ),
+            );
           } else if (snapshot.hasError) {
             return Center(
               child: Text(snapshot.error.toString()),
@@ -67,17 +100,26 @@ class _NewsFeedState extends State<NewsFeed> {
 Widget _noNews(BuildContext context) =>
     NoData(image: AssetImage(AssetIcon.news), message: context.l10n.noNewsYet);
 
-class NewsItem extends StatelessWidget {
-  final New news;
-
-  const NewsItem({Key? key, required this.news}) : super(key: key);
+class NewsHeader extends StatelessWidget {
+  const NewsHeader({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(news.title),
-      subtitle: Text(news.publishedAt.formatYmmmmd()),
-      leading: Image.network(news.imageUrl),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+            height: 20,
+            foregroundDecoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16)))),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Text(context.l10n.newsFeed),
+        )
+      ],
     );
   }
 }
