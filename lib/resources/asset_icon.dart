@@ -26,4 +26,11 @@ class AssetIcon {
   static const String upload = 'assets/icons/upload.png';
   static const String visibility = 'assets/icons/visibility.png';
   static const String visibilityOff = 'assets/icons/visibility_off.png';
+  static const String calendarGray = 'assets/icons/calendar_gray.png';
+  static const String notFoundHeart = 'assets/icons/not_found_heart.png';
+  static const String notFoundSearch = 'assets/icons/not_found_search.png';
+  static const String notFoundNew = 'assets/icons/not_found_new.png';
+  static const String favoriteOutlineGray =
+      'assets/icons/favorite_outline_gray.png';
+  static const String favoriteSelected = 'assets/icons/favorite_selected.png';
 }

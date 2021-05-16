@@ -28,5 +28,11 @@ void main() {
     expect(true, File(AssetIcon.upload).existsSync());
     expect(true, File(AssetIcon.visibility).existsSync());
     expect(true, File(AssetIcon.visibilityOff).existsSync());
+    expect(true, File(AssetIcon.calendarGray).existsSync());
+    expect(true, File(AssetIcon.notFoundHeart).existsSync());
+    expect(true, File(AssetIcon.notFoundSearch).existsSync());
+    expect(true, File(AssetIcon.notFoundNew).existsSync());
+    expect(true, File(AssetIcon.favoriteOutlineGray).existsSync());
+    expect(true, File(AssetIcon.favoriteSelected).existsSync());
   });
 }
