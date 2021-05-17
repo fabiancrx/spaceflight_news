@@ -9,6 +9,13 @@ class NoData extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: Column(children: [Image(image: image), Text(message)]));
+    return Center(
+        child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [Image(image: image,fit: BoxFit.cover,), Padding(
+        padding: const EdgeInsets.only(top: 16),
+        child: Text(message),
+      )],
+    ));
   }
 }

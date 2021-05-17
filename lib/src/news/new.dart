@@ -7,6 +7,7 @@ class New {
   final String newsSite;
   final String summary;
   final DateTime publishedAt;
+  bool isFavorite;
 
   New({
     required this.id,
@@ -17,10 +18,11 @@ class New {
     required this.newsSite,
     required this.summary,
     required this.publishedAt,
+    this.isFavorite = false,
   });
 
   factory New.fromJson(Map<String, dynamic> json) => New(
-        id: json["id"],
+        id: json["id"]??'',
         featured: json["featured"],
         title: json["title"],
         url: json["url"],
@@ -40,4 +42,12 @@ class New {
         "summary": summary,
         "publishedAt": publishedAt.toIso8601String(),
       };
+}
+New markAsFavorite(New news) {
+  news.isFavorite = true;
+  return news;
+}
+New toggleFavorite(New news) {
+  news.isFavorite = !news.isFavorite;
+  return news;
 }
