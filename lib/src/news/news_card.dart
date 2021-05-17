@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spaceflight_news/main.dart';
 import 'package:spaceflight_news/resources/resources.dart';
 import 'package:spaceflight_news/src/common/extensions.dart';
+import 'package:spaceflight_news/src/common/theme.dart';
 import 'package:spaceflight_news/src/news/new.dart';
-
+const favoriteCardHeight=.42;
+const newsCardHeight=.39;
 class NewsCard extends StatelessWidget {
   final New news;
 
@@ -15,7 +17,7 @@ class NewsCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         var screenSize = MediaQuery.of(context).size;
-        var boxConstraints = constraints.constrainDimensions(double.infinity, screenSize.height * .33);
+        var boxConstraints = constraints.constrainDimensions(double.infinity, screenSize.height * .39);
         return ConstrainedBox(
           constraints: BoxConstraints.loose(boxConstraints),
           child: Stack(
@@ -42,11 +44,9 @@ class NewsCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(news.title),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: DateRow(news: news),
-                        ),
+                        Text(news.title,style: TextStyles.caption1),
+                        SizedBox(height: 12),
+                        DateRow(news: news),
                       ],
                     ),
                   ),
@@ -75,7 +75,7 @@ class DateRow extends StatelessWidget {
         Image.asset(AssetIcon.calendarGray),
         Padding(
           padding: const EdgeInsets.only(left: 8, right: 24),
-          child: Text(news.publishedAt.formatYmmmmd()),
+          child: Text(news.publishedAt.formatYmmmmd(),style: TextStyles.body2),
         ),
         InkWell(
           onTap: () {
