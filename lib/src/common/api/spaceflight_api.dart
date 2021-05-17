@@ -18,43 +18,55 @@ class SpaceflightApi {
     }
   }
 
-  Future<List<New>?> articles() async {
+  Future<Response> _get(Future<Response> request) async {
     try {
-      final response = await _client.get('articles');
-      if (response.statusCode == 200) {
-        final decodedArticles = response.data as List;
-        final news = decodedArticles.map((e) => New.fromJson(e)).toList(growable: false);
-
-        for (final article in news) {
-          _newsCache[article.id] = article;
-        }
-        return news;
-      }
-    } on DioError catch (error, stacktrace) {
-      // TODO logging
+      final response = await request;
+      return response;
+    } on DioError catch (error) {
       throw ServerException.fromDioError(error);
-    } on Exception catch (error, stacktrace) {
-      throw ServerException(message: 'Error connecting to server', stackTrace: stacktrace);
+    }
+  }
+
+  Future<List<New>?> articles({int? limit, int? offset}) async {
+    StringBuffer baseQuery = StringBuffer('articles');
+    if (limit != null) baseQuery.write('$baseQuery?_limit=$limit');
+    if (offset != null) baseQuery.write('$baseQuery?_offset=$offset');
+
+    final response = await _get(_client.get(baseQuery.toString()));
+    if (response.statusCode == 200) {
+      final decodedArticles = response.data as List;
+      final news = decodedArticles.map((e) => New.fromJson(e)).toList(growable: false);
+
+      for (final article in news) {
+        _newsCache[article.id] = article;
+      }
+      return news;
+    }
+  }
+
+  Future<List<New>?> search(String searchTerm) async {
+    final response = await _get(_client.get('articles?title_contains=$searchTerm'));
+    if (response.statusCode == 200) {
+      final decodedArticles = response.data as List;
+      final news = decodedArticles.map((e) => New.fromJson(e)).toList(growable: false);
+
+      for (final article in news) {
+        _newsCache[article.id] = article;
+      }
+      return news;
     }
   }
 
   Future<New?> article(String id) async {
-    try {
-      if (_newsCache.containsKey(id)) {
-        return _newsCache[id];
-      }
+    if (_newsCache.containsKey(id)) {
+      return _newsCache[id];
+    }
 
-      final response = await _client.get('articles/$id');
-      if (response.statusCode == 200) {
-        final decodedArticle = response.data;
-        final article = New.fromJson(decodedArticle);
-        return article;
-      }
-    } on DioError catch (error, stacktrace) {
-      // TODO Refactor error handling to interceptor
-      throw ServerException.fromDioError(error);
-    } on Exception catch (error, stacktrace) {
-      throw ServerException(message: 'Error connecting to server', stackTrace: stacktrace);
+    final response = await _get(_client.get('articles/$id'));
+    if (response.statusCode == 200) {
+      final decodedArticle = response.data;
+      final article = New.fromJson(decodedArticle);
+      return article;
     }
   }
 }

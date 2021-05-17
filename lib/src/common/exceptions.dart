@@ -1,15 +1,15 @@
 import 'package:dio/dio.dart';
 
-class ServerException<T> implements Exception {
+class ServerException implements Exception {
   final int? statusCode;
   final String message;
-  final T? response;
+  final Object? response;
   final StackTrace? stackTrace;
 
   ServerException(
       {required this.message, this.statusCode, this.response, this.stackTrace});
 
-  static ServerException<Response<dynamic>?> fromDioError(DioError error,
+  static ServerException fromDioError(DioError error,
       {String? message}) {
     return ServerException(
       statusCode: error.response?.statusCode,

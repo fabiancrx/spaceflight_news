@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:spaceflight_news/src/common/api/spaceflight_api.dart';
 import 'package:spaceflight_news/src/common/extensions.dart';
@@ -33,6 +34,7 @@ var feedViewModel = ChangeNotifierProvider(
     (ref) => FeedViewModel(spaceflightApi: ref.watch(api), favoritesService: ref.watch(favoritesService)));
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   var _sharedPreferences = await SharedPreferences.getInstance();
 
   runApp(ProviderScope(
@@ -41,6 +43,7 @@ void main() async {
         onGenerateTitle: (BuildContext context) => context.l10n.appTitle,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        theme: ThemeData(textTheme: GoogleFonts.ibmPlexSansTextTheme()),
         home: NewsFeed()),
   ));
 }

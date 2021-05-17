@@ -18,10 +18,15 @@ class FakeSpaceflight implements SpaceflightApi {
   }
 
   @override
-  Future<List<New>?> articles() async {
+  Future<List<New>?> articles({int? limit, int? offset}) async {
     final file = new File('test/mocks/articles.json');
     final json = jsonDecode(await file.readAsString()) as List;
     final news = json.map((e) => New.fromJson(e)).toList(growable: false);
     return news;
+  }
+
+  @override
+  Future<List<New>?> search(String searchTerm) {
+    throw UnimplementedError();
   }
 }
