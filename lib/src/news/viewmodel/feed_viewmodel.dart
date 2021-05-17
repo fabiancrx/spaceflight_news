@@ -57,3 +57,23 @@ class FeedViewModel extends ChangeNotifier {
     return news;
   }
 }
+
+class BottomBar extends ChangeNotifier {
+  BottomBarItem state;
+
+  BottomBar([BottomBarItem? initialState]) : state = initialState ?? BottomBarItem.feed;
+
+  void toggle() {
+    state = BottomBarItem.values[state.index + 1 % BottomBarItem.values.length];
+    notifyListeners();
+  }
+
+  void changeIndex(int index) {
+    if (index < BottomBarItem.values.length) {
+      state = BottomBarItem.values[index];
+      notifyListeners();
+    } else {
+      throw IndexError(index, BottomBarItem.values);
+    }
+  }
+}

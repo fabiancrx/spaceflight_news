@@ -55,7 +55,13 @@ class TextStyles {
         height: 1.286,
         color: OnePlaceColor.gray500,
       );
-
+  //card detail text
+  static TextStyle get body1 => ibm.copyWith(
+    fontWeight: FontWeight.w400,
+    fontSize: FontSizes.s16,
+    height: 1.375,
+    color: OnePlaceColor.gray700,
+  );
   //tabs
   static TextStyle get tab3Active => ibm.copyWith(
         fontWeight: FontWeight.w600,
