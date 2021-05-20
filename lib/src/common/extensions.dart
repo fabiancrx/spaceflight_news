@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
@@ -14,5 +15,16 @@ extension AppLocalizationX on BuildContext {
 extension DateTimeX on DateTime {
   String formatYmmmmd() {
     return DateFormat.yMMMMd('en_US').format(this);
+  }
+}
+
+extension BrightnessX on Brightness {
+  Brightness invert() {
+    switch (this) {
+      case Brightness.dark:
+        return Brightness.light;
+      case Brightness.light:
+        return Brightness.dark;
+    }
   }
 }

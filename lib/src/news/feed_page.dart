@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spaceflight_news/main.dart';
 import 'package:spaceflight_news/resources/resources.dart';
@@ -22,6 +23,15 @@ final newsListProvider = FutureProvider<List<New>?>((ref) {
       return _feedViewModel.getFavoriteNews();
   }
 });
+final _noDataWidget = Provider.family<Widget, bool>((ref, isLoading) {
+  var tab = ref.watch(_currentBottomBarItem);
+  switch (tab.state) {
+    case BottomBarItem.feed:
+      return NoNews(isLoading: isLoading);
+    case BottomBarItem.favorites:
+      return NoFavorites(isLoading: isLoading);
+  }
+});
 
 class NewsFeed extends StatelessWidget {
   const NewsFeed({Key? key}) : super(key: key);
@@ -35,17 +45,15 @@ class NewsFeed extends StatelessWidget {
 
         late String title;
         late String subTitle;
-        late Widget noData;
-        switch (BottomBarItem.values[bottomBar.state.index]) {
+
+        switch (bottomBar.state) {
           case BottomBarItem.feed:
             title = context.l10n.feed;
             subTitle = context.l10n.newsFeed;
-            noData = _noNews(context);
             break;
           case BottomBarItem.favorites:
             title = context.l10n.favorites;
             subTitle = context.l10n.favoriteArticles;
-            noData = _noFavorites(context);
             break;
         }
 
@@ -57,13 +65,15 @@ class NewsFeed extends StatelessWidget {
                   title: Text(title, style: TextStyles.h1),
                   centerTitle: false,
                   elevation: 0,
+                  brightness: Brightness.light,
+                  backwardsCompatibility: false,
+                  systemOverlayStyle: SystemUiOverlayStyle(
+                      statusBarColor: Theme.of(context).backgroundColor,
+                      statusBarIconBrightness: Theme.of(context).brightness.invert()),
                   actions: [
                     Padding(
                       padding: const EdgeInsets.only(right: 16),
-                      child: Icon(
-                        Icons.search,
-                        size: 24,
-                      ),
+                      child: Icon(Icons.search, size: 24),
                     )
                   ],
                 )),
@@ -77,7 +87,7 @@ class NewsFeed extends StatelessWidget {
                     data: (data) {
                       final news = data.value;
                       if (news == null || news.isEmpty) {
-                        return noData;
+                        return watch(_noDataWidget(false));
                       }
 
                       return Column(
@@ -100,7 +110,7 @@ class NewsFeed extends StatelessWidget {
                         ],
                       );
                     },
-                    loading: (_) => noData,
+                    loading: (_) => watch(_noDataWidget(true)),
                     error: (error) => Center(
                           child: Text(error.toString()),
                         ))));
@@ -109,10 +119,27 @@ class NewsFeed extends StatelessWidget {
   }
 }
 
-Widget _noNews(BuildContext context) => NoData(image: AssetImage(AssetIcon.notFoundNew), text: context.l10n.noNewsYet);
+class NoNews extends StatelessWidget {
+  final bool isLoading;
 
-Widget _noFavorites(BuildContext context) => NoData(
+  const NoNews({Key? key, this.isLoading = false}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return NoData(isLoading: isLoading, image: AssetImage(AssetIcon.notFoundNew), text: context.l10n.noNewsYet);
+  }
+}
+
+class NoFavorites extends StatelessWidget {
+  final bool isLoading;
+
+  const NoFavorites({Key? key, this.isLoading = false}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return NoData(
       image: AssetImage(AssetIcon.notFoundHeart),
+      isLoading: isLoading,
       text: context.l10n.favoritesNoResults,
       child: Row(
         children: [
@@ -136,6 +163,8 @@ Widget _noFavorites(BuildContext context) => NoData(
         mainAxisAlignment: MainAxisAlignment.center,
       ),
     );
+  }
+}
 
 class FeedHeader extends StatelessWidget {
   final String text;
@@ -163,10 +192,8 @@ class FeedHeader extends StatelessWidget {
   }
 }
 
-/// A provider that exposes only the current bottomBar
+/// A provider that exposes the current bottomBar
 final _currentBottomBarItem = ChangeNotifierProvider((ref) => BottomBar());
-
-
 
 class BottomNavBar extends ConsumerWidget {
   const BottomNavBar({Key? key}) : super(key: key);

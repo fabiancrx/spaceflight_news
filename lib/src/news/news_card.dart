@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spaceflight_news/main.dart';
 import 'package:spaceflight_news/resources/resources.dart';
 import 'package:spaceflight_news/src/common/extensions.dart';
 import 'package:spaceflight_news/src/common/theme.dart';
+import 'package:spaceflight_news/src/common/widget/placeholder_image.dart';
 import 'package:spaceflight_news/src/news/new.dart';
 
 const favoriteCardHeight = .42;
@@ -118,43 +120,56 @@ class NewsDetail extends StatelessWidget {
               centerTitle: false,
               elevation: 0,
               backgroundColor: OnePlaceColor.gray900,
+              backwardsCompatibility: false,
+              systemOverlayStyle: SystemUiOverlayStyle(
+                  statusBarColor: Theme.of(context).backgroundColor,
+                  statusBarIconBrightness: Theme.of(context).brightness.invert()),
             )),
         body: Stack(
-
           children: [
             Positioned(
-              child: Image.network(
+              child: PlaceHolderNetworkImage(
                 news.imageUrl,
                 fit: BoxFit.cover,
-                width: size.height * .375,
+                height: size.height * .275,
               ),
               top: 0,
               left: 0,
               right: 0,
             ),
             Positioned(
-                top: size.height * .36 + NewsDetail._appBarSize,
+                top: size.height * .26,
                 // width: size.width,
                 bottom: 0.0,
                 right: 0.0,
                 left: 0.0,
-
                 child: Card(
                   margin: EdgeInsets.zero,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
                   child: Padding(
                     padding: EdgeInsets.all(16),
-                    child: ListView(shrinkWrap: true,
+                    child: ListView(
+                      shrinkWrap: true,
                       children: [
                         Text(news.title, style: TextStyles.caption1),
                         SizedBox(height: 16),
                         Divider(),
+                        Padding(
+                          padding: EdgeInsets.only(top: 12, bottom: 9),
+                          child: Row(
+                            children: [
+                              Text(context.l10n.by, style: TextStyles.body1),
+                              SizedBox(width: 8),
+                              Text(news.newsSite, style: TextStyles.caption1)
+                            ],
+                          ),
+                        ),
                         SizedBox(height: 12),
                         DateRow(news: news),
                         SizedBox(height: 44),
                         Text(
-                          news.summary*35,
+                          news.summary,
                           style: TextStyles.body1,
                         ),
                       ],

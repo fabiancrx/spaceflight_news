@@ -12,8 +12,8 @@ void main() {
   late SpaceflightApi spaceflightApi;
   setUp(() {
     // uncomment for integration testing with external services
-    spaceflightApi = SpaceflightApi(environment: Environment.production());
-    // spaceflightApi = FakeSpaceflight();
+    // spaceflightApi = SpaceflightApi(environment: Environment.production());
+    spaceflightApi = FakeSpaceflight();
   });
   group('GET news form API ', () {
     test('News Lists are correctly fetched and deserialized', () async {

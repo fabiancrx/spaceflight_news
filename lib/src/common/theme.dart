@@ -77,7 +77,7 @@ class TextStyles {
 }
 
 class OnePlaceColor {
-  static const accent = Color(0xff3800b0); // primary color
+  static const accent = Color(0xff0C39AC); // primary color
   static const gray900 = Color(0xff111827); // activeTab Text, detail appBar
   static const gray800 = Color(0xff1F2937); // fonts in not found screens, card title
   static const gray700 = Color(0xff374151); // restingTab Text

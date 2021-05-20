@@ -31,10 +31,14 @@ var theme = Provider((_) => AppTheme(isDark: false));
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+
   var _sharedPreferences = await SharedPreferences.getInstance();
 
   runApp(ProviderScope(
-    overrides: [sharedPreferences.overrideWithValue(_sharedPreferences)],
+    overrides: [
+      sharedPreferences.overrideWithValue(_sharedPreferences),
+    ],
     child: Consumer(
       builder: (_, watch, child) {
         return MaterialApp(

@@ -5,43 +5,62 @@ class NoData extends StatelessWidget {
   final ImageProvider image;
   final String text;
   final Widget? child;
+  final bool isLoading;
 
-  const NoData({Key? key, required this.image, required this.text, this.child}) : super(key: key);
+  const NoData({
+    Key? key,
+    required this.image,
+    required this.text,
+    this.child,
+    this.isLoading = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    late final Widget textWidget;
+    late final List<Widget> textWidget;
     if (child != null) {
-      textWidget = Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            text,
-            style: TextStyles.caption2,
-          ),
-          child!
-        ],
-      );
+      textWidget = [
+        Text(
+          text,
+          style: TextStyles.caption2,
+        ),
+        child!
+      ];
     } else {
-      textWidget = Text(
-        text,
-        style: TextStyles.caption2,
-      );
+      textWidget = [
+        Text(
+          text,
+          style: TextStyles.caption2,
+        )
+      ];
     }
 
-    return Center(
-        child: Column(
-      mainAxisSize: MainAxisSize.min,
+    return Stack(
+      fit: StackFit.expand,
       children: [
-        Image(
-          image: image,
-          fit: BoxFit.cover,
+        if(isLoading)Align(
+          alignment: AlignmentDirectional.topCenter,
+          child: LinearProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(
+              Theme.of(context).primaryColor.withOpacity(.33),
+            ),
+          ),
         ),
-        Padding(
-          padding: const EdgeInsets.only(top: 16),
-          child: textWidget,
-        )
+
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+
+          children: [
+            Image(
+              image: image,
+              fit: BoxFit.cover,
+            ),
+            SizedBox(height: 16),
+            ...textWidget
+          ],
+        ),
       ],
-    ));
+    );
   }
 }
