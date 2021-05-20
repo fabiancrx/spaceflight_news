@@ -41,13 +41,25 @@ class FeedViewModel extends ChangeNotifier {
   ///the retrieved news that are favorite are marked as such making it's `isFavorite` attribute `true`
   Future<List<New>?> getNews() async {
     var articles = await spaceflightApi.articles();
-    if (articles != null && articles.isNotEmpty) {
+
+    return markFavorites(articles);
+  }
+
+  Future<List<New>?> search(String term) async {
+    var articles = await spaceflightApi.search(term);
+
+    return markFavorites(articles);
+  }
+
+  List<New>? markFavorites(List<New>? rawNews) {
+    if (rawNews != null && rawNews.isNotEmpty) {
       var favorites = this.favoritesService.favorites;
-      for (var article in articles) {
+      for (var article in rawNews) {
         _isNewFavorite(favorites, article);
       }
     }
-    return articles;
+
+    return rawNews;
   }
 
   New _isNewFavorite(List<String> favoritesId, New news) {
@@ -75,5 +87,29 @@ class BottomBar extends ChangeNotifier {
     } else {
       throw IndexError(index, BottomBarItem.values);
     }
+  }
+}
+
+class SearchBarState extends ChangeNotifier {
+  bool _isActive;
+  String? _searchTerm;
+
+  SearchBarState({String? searchTerm, bool isActive = false})
+      : _searchTerm = searchTerm,
+        _isActive = isActive;
+
+  bool get isActive => _isActive;
+
+  String? get searchTerm => _searchTerm;
+
+  set searchTerm(String? term) {
+    _searchTerm = term;
+    notifyListeners();
+  }
+
+  void toggle() {
+    _isActive = !_isActive;
+    print('SearchBar active is $_isActive');
+    notifyListeners();
   }
 }

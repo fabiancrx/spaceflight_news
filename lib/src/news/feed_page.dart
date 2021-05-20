@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:spaceflight_news/main.dart';
 import 'package:spaceflight_news/resources/resources.dart';
 import 'package:spaceflight_news/src/common/extensions.dart';
@@ -12,16 +14,33 @@ import 'package:spaceflight_news/src/news/viewmodel/feed_viewmodel.dart';
 import 'package:spaceflight_news/src/news/widget/search.dart';
 
 import 'news_card.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 
 /// A provider that exposes the current bottomBar
 final _currentBottomBarTabProvider = ChangeNotifierProvider((ref) => BottomBar());
+
+/// A provider that exposes the SearchBar state
+final searchBarProvider = ChangeNotifierProvider((ref) => SearchBarState());
 
 /// The future that the [FeedPage] will await to display tne [List<New>]
 final newsListProvider = FutureProvider<List<New>?>((ref) {
   final tab = ref.watch(_currentBottomBarTabProvider);
 
+  final search = ref.watch(searchBarProvider);
   final _feedViewModel = ref.read(feedViewModel);
+
+  if (search.isActive) {
+    if (search.searchTerm != null) {
+      switch (tab.state) {
+        case BottomBarItem.feed:
+          return _feedViewModel.search(search.searchTerm!);
+        case BottomBarItem.favorites:
+          return _feedViewModel.getFavoriteNews();
+      }
+    } else {
+      return Future.value([]);
+    }
+  }
+
   switch (tab.state) {
     case BottomBarItem.feed:
       return _feedViewModel.getNews();
@@ -30,10 +49,33 @@ final newsListProvider = FutureProvider<List<New>?>((ref) {
   }
 });
 
+final searchListProvider = FutureProvider<List<New>?>((ref) {
+  final tab = ref.watch(_currentBottomBarTabProvider);
+  final search = ref.watch(searchBarProvider);
+
+  final _feedViewModel = ref.read(feedViewModel);
+  if (search.isActive && search.searchTerm != null) {
+    switch (tab.state) {
+      case BottomBarItem.feed:
+        return _feedViewModel.search(search.searchTerm!);
+      case BottomBarItem.favorites:
+        return _feedViewModel.getFavoriteNews();
+    }
+  } else {
+    return Future.value([]);
+  }
+});
+
 /// A provider for the widget that will be shown when the [FeedPage] has no data.
 /// The [isLoading] property corresponds to the [NoData] widget.
 final _noDataWidgetProvider = Provider.family<Widget, bool>((ref, isLoading) {
   var tab = ref.watch(_currentBottomBarTabProvider);
+  final search = ref.watch(searchBarProvider);
+
+  if (search.isActive) {
+    return NoSearchResults();
+  }
+
   switch (tab.state) {
     case BottomBarItem.feed:
       return NoNews(isLoading: isLoading);
@@ -42,111 +84,103 @@ final _noDataWidgetProvider = Provider.family<Widget, bool>((ref, isLoading) {
   }
 });
 
-/// A provider that exposes the current bottomBar
-_searchActiveProvider() => UnimplementedError();
-
-class NewsFeed extends StatefulWidget {
+class NewsFeed extends HookWidget {
   const NewsFeed({Key? key}) : super(key: key);
 
   @override
-  _NewsFeedState createState() => _NewsFeedState();
-}
-
-class _NewsFeedState extends State<NewsFeed> {
-  bool isSearching = false;
-  double appBarHeight = 64;
-
-
-  @override
   Widget build(BuildContext context) {
-    appBarHeight = 64 + (isSearching ? 60 : 0);
-    return Consumer(
-      builder: (context, watch, child) {
-        var bottomBar = watch(_currentBottomBarTabProvider);
-        var _feedViewModel = watch(feedViewModel);
+    var bottomBar = useProvider(_currentBottomBarTabProvider);
+    var _feedViewModel = useProvider(feedViewModel);
 
-        late String title;
-        late String subTitle;
+    var search = useProvider(searchBarProvider);
+    double appBarHeight = 64 + (search.isActive ? 60 : 0);
 
-        switch (bottomBar.state) {
-          case BottomBarItem.feed:
-            title = context.l10n.feed;
-            subTitle = context.l10n.newsFeed;
-            break;
-          case BottomBarItem.favorites:
-            title = context.l10n.favorites;
-            subTitle = context.l10n.favoriteArticles;
-            break;
-        }
-        final PreferredSizeWidget? bottomAppBarWidget = isSearching
-            ? PreferredSize(
-                preferredSize: Size.fromHeight(40),
-                child: SearchBar(),
-              )
-            : null;
-        return Scaffold(
-            backgroundColor: Theme.of(context).backgroundColor,
-            appBar: PreferredSize(
-                preferredSize: Size.fromHeight(appBarHeight),
-                child: AppBar(
-                  title: Text(title, style: TextStyles.h1),
-                  centerTitle: false,
-                  elevation: 0,
-                  brightness: Brightness.light,
-                  backwardsCompatibility: false,
-                  systemOverlayStyle: SystemUiOverlayStyle(
-                      statusBarColor: Theme.of(context).backgroundColor,
-                      statusBarIconBrightness: Theme.of(context).brightness.invert()),
-                  actions: [
-                    IconButton(
-                      icon: Icon(isSearching ? Icons.clear : Icons.search, size: 24),
-                      onPressed: () {
-                        setState(() {
-                          isSearching = !isSearching;
-                        });
-                      },
-                    )
-                  ],
-                  bottom: bottomAppBarWidget,
-                )),
-            bottomNavigationBar: BottomNavBar(),
-            body: Container(
+    late String title;
+    late String subTitle;
+
+    switch (bottomBar.state) {
+      case BottomBarItem.feed:
+        title = context.l10n.feed;
+        subTitle = context.l10n.newsFeed;
+        break;
+      case BottomBarItem.favorites:
+        title = context.l10n.favorites;
+        subTitle = context.l10n.favoriteArticles;
+        break;
+    }
+
+    final PreferredSizeWidget? bottomAppBarWidget =
+        search.isActive ? PreferredSize(preferredSize: Size.fromHeight(40), child: SearchBar()) : null;
+
+    return Scaffold(
+        backgroundColor: Theme.of(context).backgroundColor,
+        appBar: PreferredSize(
+            preferredSize: Size.fromHeight(appBarHeight),
+            child: AppBar(
+              title: Text(title, style: TextStyles.h1),
+              centerTitle: false,
+              elevation: 0,
+              brightness: Brightness.light,
+              backwardsCompatibility: false,
+              systemOverlayStyle: SystemUiOverlayStyle(
+                  statusBarColor: Theme.of(context).backgroundColor,
+                  statusBarIconBrightness: Theme.of(context).brightness.invert()),
+              actions: [
+                IconButton(icon: Icon(search.isActive ? Icons.clear : Icons.search, size: 24), onPressed: search.toggle)
+              ],
+              bottom: bottomAppBarWidget,
+            )),
+        bottomNavigationBar: BottomNavBar(),
+        body: Container(
+          color: Theme.of(context).primaryColor,
+          child: ClipRRect(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
+            ),
+            child: Container(
                 decoration: BoxDecoration(
                   color: Theme.of(context).backgroundColor,
                   borderRadius: const BorderRadius.only(topRight: Radius.circular(16), topLeft: Radius.circular(16)),
                 ),
-                child: watch(newsListProvider).map<Widget>(
-                    data: (data) {
-                      final news = data.value;
-                      if (news == null || news.isEmpty) {
-                        return watch(_noDataWidgetProvider(false));
-                      }
-
-                      return Column(
-                        children: [
-                          FeedHeader(text: subTitle),
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: ListView(
-                                shrinkWrap: false,
-                                children: [
-                                  for (var i = 0; i < news.length; i++) ...[
-                                    if (i > 0) const SizedBox(height: 16),
-                                    NewsCard(news: news[i]),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          )
-                        ],
-                      );
-                    },
-                    loading: (_) => watch(_noDataWidgetProvider(true)),
+                child: useProvider(newsListProvider).map<Widget>(
+                    data: (data) => _newsList(data.value, subTitle),
+                    loading: (_) => useProvider(_noDataWidgetProvider(true)),
                     error: (error) => Center(
                           child: Text(error.toString()),
-                        ))));
-      },
+                        ))),
+          ),
+        ));
+  }
+
+  _newsList(List<New>? news, String subtitle) {
+    if (news == null || news.isEmpty) {
+      return useProvider(_noDataWidgetProvider(false));
+    }
+    return Column(
+      children: [
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 24, left: 18, top: 20),
+            child: Text(subtitle, style: TextStyles.h2),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ListView(
+              shrinkWrap: false,
+              children: [
+                for (var i = 0; i < news.length; i++) ...[
+                  if (i > 0) const SizedBox(height: 16),
+                  NewsCard(news: news[i]),
+                ],
+              ],
+            ),
+          ),
+        )
+      ],
     );
   }
 }
@@ -192,32 +226,6 @@ class BottomNavBar extends ConsumerWidget {
   }
 }
 
-class FeedHeader extends StatelessWidget {
-  final String text;
-
-  const FeedHeader({Key? key, required this.text}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-            height: 20,
-            decoration: BoxDecoration(color: Theme.of(context).primaryColor),
-            foregroundDecoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)))),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 24, left: 16),
-          child: Text(text, style: TextStyles.h2),
-        )
-      ],
-    );
-  }
-}
-
 class NoNews extends StatelessWidget {
   final bool isLoading;
 
@@ -226,6 +234,25 @@ class NoNews extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return NoData(isLoading: isLoading, image: AssetImage(AssetIcon.notFoundNew), text: context.l10n.noNewsYet);
+  }
+}
+
+class NoSearchResults extends StatelessWidget {
+  final bool isLoading;
+
+  const NoSearchResults({Key? key, this.isLoading = false}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return NoData(
+      image: AssetImage(AssetIcon.notFoundSearch),
+      isLoading: isLoading,
+      text: context.l10n.searchNoResults,
+      child: Text(
+        context.l10n.searchAnotherWord,
+        style: TextStyles.body2.copyWith(color: OnePlaceColor.gray800),
+      ),
+    );
   }
 }
 

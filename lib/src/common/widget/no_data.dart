@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spaceflight_news/src/common/theme.dart';
+import 'package:spaceflight_news/src/news/feed_page.dart';
 
 /// A widget that displays an icon and text to communicate to the user a message
 /// If the [isLoading] boolean is true a [LinearProgressIndicator] is shown.
@@ -50,6 +51,7 @@ class NoData extends StatelessWidget {
               ),
             ),
           ),
+
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,

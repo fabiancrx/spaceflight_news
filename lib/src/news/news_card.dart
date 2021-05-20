@@ -93,7 +93,7 @@ class DateRow extends StatelessWidget {
         ),
         InkWell(
           onTap: () {
-            context.read(feedViewModel).toggleFavorite(news);
+            context.read(feedViewModel.notifier).toggleFavorite(news);
           },
           child: favorite,
         ),
