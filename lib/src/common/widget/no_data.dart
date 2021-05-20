@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:spaceflight_news/src/common/theme.dart';
 
+/// A widget that displays an icon and text to communicate to the user a message
+/// If the [isLoading] boolean is true a [LinearProgressIndicator] is shown.
+/// This is useful for when you are awaiting a [Future] to complete
 class NoData extends StatelessWidget {
   final ImageProvider image;
   final String text;
@@ -38,19 +41,18 @@ class NoData extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        if(isLoading)Align(
-          alignment: AlignmentDirectional.topCenter,
-          child: LinearProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(
-              Theme.of(context).primaryColor.withOpacity(.33),
+        if (isLoading)
+          Align(
+            alignment: AlignmentDirectional.topCenter,
+            child: LinearProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(
+                Theme.of(context).primaryColor.withOpacity(.33),
+              ),
             ),
           ),
-        ),
-
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
-
           children: [
             Image(
               image: image,

@@ -9,11 +9,17 @@ import 'package:spaceflight_news/src/common/theme.dart';
 import 'package:spaceflight_news/src/common/widget/no_data.dart';
 import 'package:spaceflight_news/src/news/new.dart';
 import 'package:spaceflight_news/src/news/viewmodel/feed_viewmodel.dart';
+import 'package:spaceflight_news/src/news/widget/search.dart';
 
 import 'news_card.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
+/// A provider that exposes the current bottomBar
+final _currentBottomBarTabProvider = ChangeNotifierProvider((ref) => BottomBar());
+
+/// The future that the [FeedPage] will await to display tne [List<New>]
 final newsListProvider = FutureProvider<List<New>?>((ref) {
-  final tab = ref.watch(_currentBottomBarItem);
+  final tab = ref.watch(_currentBottomBarTabProvider);
 
   final _feedViewModel = ref.read(feedViewModel);
   switch (tab.state) {
@@ -23,8 +29,11 @@ final newsListProvider = FutureProvider<List<New>?>((ref) {
       return _feedViewModel.getFavoriteNews();
   }
 });
-final _noDataWidget = Provider.family<Widget, bool>((ref, isLoading) {
-  var tab = ref.watch(_currentBottomBarItem);
+
+/// A provider for the widget that will be shown when the [FeedPage] has no data.
+/// The [isLoading] property corresponds to the [NoData] widget.
+final _noDataWidgetProvider = Provider.family<Widget, bool>((ref, isLoading) {
+  var tab = ref.watch(_currentBottomBarTabProvider);
   switch (tab.state) {
     case BottomBarItem.feed:
       return NoNews(isLoading: isLoading);
@@ -33,14 +42,27 @@ final _noDataWidget = Provider.family<Widget, bool>((ref, isLoading) {
   }
 });
 
-class NewsFeed extends StatelessWidget {
+/// A provider that exposes the current bottomBar
+_searchActiveProvider() => UnimplementedError();
+
+class NewsFeed extends StatefulWidget {
   const NewsFeed({Key? key}) : super(key: key);
 
   @override
+  _NewsFeedState createState() => _NewsFeedState();
+}
+
+class _NewsFeedState extends State<NewsFeed> {
+  bool isSearching = false;
+  double appBarHeight = 64;
+
+
+  @override
   Widget build(BuildContext context) {
+    appBarHeight = 64 + (isSearching ? 60 : 0);
     return Consumer(
       builder: (context, watch, child) {
-        var bottomBar = watch(_currentBottomBarItem);
+        var bottomBar = watch(_currentBottomBarTabProvider);
         var _feedViewModel = watch(feedViewModel);
 
         late String title;
@@ -56,11 +78,16 @@ class NewsFeed extends StatelessWidget {
             subTitle = context.l10n.favoriteArticles;
             break;
         }
-
+        final PreferredSizeWidget? bottomAppBarWidget = isSearching
+            ? PreferredSize(
+                preferredSize: Size.fromHeight(40),
+                child: SearchBar(),
+              )
+            : null;
         return Scaffold(
             backgroundColor: Theme.of(context).backgroundColor,
             appBar: PreferredSize(
-                preferredSize: Size.fromHeight(64),
+                preferredSize: Size.fromHeight(appBarHeight),
                 child: AppBar(
                   title: Text(title, style: TextStyles.h1),
                   centerTitle: false,
@@ -71,11 +98,16 @@ class NewsFeed extends StatelessWidget {
                       statusBarColor: Theme.of(context).backgroundColor,
                       statusBarIconBrightness: Theme.of(context).brightness.invert()),
                   actions: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: Icon(Icons.search, size: 24),
+                    IconButton(
+                      icon: Icon(isSearching ? Icons.clear : Icons.search, size: 24),
+                      onPressed: () {
+                        setState(() {
+                          isSearching = !isSearching;
+                        });
+                      },
                     )
                   ],
+                  bottom: bottomAppBarWidget,
                 )),
             bottomNavigationBar: BottomNavBar(),
             body: Container(
@@ -87,7 +119,7 @@ class NewsFeed extends StatelessWidget {
                     data: (data) {
                       final news = data.value;
                       if (news == null || news.isEmpty) {
-                        return watch(_noDataWidget(false));
+                        return watch(_noDataWidgetProvider(false));
                       }
 
                       return Column(
@@ -110,11 +142,78 @@ class NewsFeed extends StatelessWidget {
                         ],
                       );
                     },
-                    loading: (_) => watch(_noDataWidget(true)),
+                    loading: (_) => watch(_noDataWidgetProvider(true)),
                     error: (error) => Center(
                           child: Text(error.toString()),
                         ))));
       },
+    );
+  }
+}
+
+class BottomNavBar extends ConsumerWidget {
+  const BottomNavBar({Key? key}) : super(key: key);
+
+  @override
+  Widget build(context, watch) {
+    var bottomBar = watch(_currentBottomBarTabProvider);
+
+    return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(topRight: Radius.circular(16), topLeft: Radius.circular(16)),
+          boxShadow: [
+            BoxShadow(color: OnePlaceColor.blur, spreadRadius: 0, blurRadius: 20, offset: Offset(0, 10)),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(16),
+            topRight: Radius.circular(16),
+          ),
+          child: BottomNavigationBar(
+            backgroundColor: watch(theme).tabBackground,
+            unselectedItemColor: OnePlaceColor.gray400,
+            unselectedLabelStyle: TextStyles.tab3Inactive,
+            selectedLabelStyle: TextStyles.tab3Active,
+            items: [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home),
+                label: context.l10n.feed,
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.favorite),
+                label: context.l10n.favorites,
+              ),
+            ],
+            currentIndex: bottomBar.state.index,
+            onTap: bottomBar.changeIndex,
+          ),
+        ));
+  }
+}
+
+class FeedHeader extends StatelessWidget {
+  final String text;
+
+  const FeedHeader({Key? key, required this.text}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+            height: 20,
+            decoration: BoxDecoration(color: Theme.of(context).primaryColor),
+            foregroundDecoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)))),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 24, left: 16),
+          child: Text(text, style: TextStyles.h2),
+        )
+      ],
     );
   }
 }
@@ -163,75 +262,5 @@ class NoFavorites extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
       ),
     );
-  }
-}
-
-class FeedHeader extends StatelessWidget {
-  final String text;
-
-  const FeedHeader({Key? key, required this.text}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-            height: 20,
-            decoration: BoxDecoration(color: Theme.of(context).primaryColor),
-            foregroundDecoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)))),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 24, left: 16),
-          child: Text(text, style: TextStyles.h2),
-        )
-      ],
-    );
-  }
-}
-
-/// A provider that exposes the current bottomBar
-final _currentBottomBarItem = ChangeNotifierProvider((ref) => BottomBar());
-
-class BottomNavBar extends ConsumerWidget {
-  const BottomNavBar({Key? key}) : super(key: key);
-
-  @override
-  Widget build(context, watch) {
-    var bottomBar = watch(_currentBottomBarItem);
-
-    return Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(topRight: Radius.circular(16), topLeft: Radius.circular(16)),
-          boxShadow: [
-            BoxShadow(color: OnePlaceColor.blur, spreadRadius: 0, blurRadius: 20, offset: Offset(0, 10)),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(16),
-            topRight: Radius.circular(16),
-          ),
-          child: BottomNavigationBar(
-            backgroundColor: watch(theme).tabBackground,
-            unselectedItemColor: OnePlaceColor.gray400,
-            unselectedLabelStyle: TextStyles.tab3Inactive,
-            selectedLabelStyle: TextStyles.tab3Active,
-            items: [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: context.l10n.feed,
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.favorite),
-                label: context.l10n.favorites,
-              ),
-            ],
-            currentIndex: bottomBar.state.index,
-            onTap: bottomBar.changeIndex,
-          ),
-        ));
   }
 }
