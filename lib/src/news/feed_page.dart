@@ -9,7 +9,7 @@ import 'package:spaceflight_news/resources/resources.dart';
 import 'package:spaceflight_news/src/common/extensions.dart';
 import 'package:spaceflight_news/src/common/theme.dart';
 import 'package:spaceflight_news/src/common/widget/no_data.dart';
-import 'package:spaceflight_news/src/news/new.dart';
+import 'package:spaceflight_news/src/news/model/new.dart';
 import 'package:spaceflight_news/src/news/viewmodel/feed_viewmodel.dart';
 import 'package:spaceflight_news/src/news/widget/search.dart';
 
@@ -36,9 +36,8 @@ final newsListProvider = FutureProvider<List<New>?>((ref) {
         case BottomBarItem.favorites:
           return _feedViewModel.getFavoriteNews();
       }
-    } else {
-      return Future.value([]);
     }
+    return Future.value([]);
   }
 
   switch (tab.state) {
@@ -49,23 +48,6 @@ final newsListProvider = FutureProvider<List<New>?>((ref) {
   }
 });
 
-final searchListProvider = FutureProvider<List<New>?>((ref) {
-  final tab = ref.watch(_currentBottomBarTabProvider);
-  final search = ref.watch(searchBarProvider);
-
-  final _feedViewModel = ref.read(feedViewModel);
-  if (search.isActive && search.searchTerm != null) {
-    switch (tab.state) {
-      case BottomBarItem.feed:
-        return _feedViewModel.search(search.searchTerm!);
-      case BottomBarItem.favorites:
-        return _feedViewModel.getFavoriteNews();
-    }
-  } else {
-    return Future.value([]);
-  }
-});
-
 /// A provider for the widget that will be shown when the [FeedPage] has no data.
 /// The [isLoading] property corresponds to the [NoData] widget.
 final _noDataWidgetProvider = Provider.family<Widget, bool>((ref, isLoading) {
@@ -73,7 +55,9 @@ final _noDataWidgetProvider = Provider.family<Widget, bool>((ref, isLoading) {
   final search = ref.watch(searchBarProvider);
 
   if (search.isActive) {
-    return NoSearchResults();
+    return NoSearchResults(
+      isLoading: isLoading,
+    );
   }
 
   switch (tab.state) {

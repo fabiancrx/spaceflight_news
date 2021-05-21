@@ -17,15 +17,28 @@ dependencies:
     sdk: flutter
   intl: ^0.17.0
 
-  shared_preferences: ^2.0.5
+  # Data persistence
+  hive: ^2.0.4
+  hive_flutter: ^1.0.0
+
+  # Http Client
   dio: ^4.0.0
+
+  # State Management
   hooks_riverpod: ^0.14.0+4
+
+  # logging
+  emoji_lumberdash: 2.0.0
+
+  # User Interface
   google_fonts: ^2.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  mockito: ^5.0.7
+  mockito: ^5.0.8
+  hive_generator: ^1.1.0
+  build_runner: ^2.0.3
 
 flutter:
   generate: true

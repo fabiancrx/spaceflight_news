@@ -6,7 +6,7 @@ import 'package:spaceflight_news/resources/resources.dart';
 import 'package:spaceflight_news/src/common/extensions.dart';
 import 'package:spaceflight_news/src/common/theme.dart';
 import 'package:spaceflight_news/src/common/widget/placeholder_image.dart';
-import 'package:spaceflight_news/src/news/new.dart';
+import 'package:spaceflight_news/src/news/model/new.dart';
 
 const favoriteCardHeight = .42;
 const newsCardHeight = .39;

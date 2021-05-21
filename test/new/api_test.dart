@@ -1,10 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spaceflight_news/src/common/api/spaceflight_api.dart';
 import 'package:spaceflight_news/src/common/exceptions.dart';
-import 'package:spaceflight_news/src/environment.dart';
-import 'package:spaceflight_news/src/news/new.dart';
-
-import 'fake_api.dart';
+import 'package:spaceflight_news/src/news/model/new.dart';
 
 const _sampleArticleId = '60a189ddc2ea06001d94fa95';
 
@@ -29,12 +26,12 @@ void main() {
       }
     });
     test('A single new is fetched from the API', () async {
-      var article = await spaceflightApi.article(_sampleArticleId);
+      var article = await spaceflightApi.readArticle(_sampleArticleId);
 
       expect(article, isA<New?>());
       expect(article?.newsSite, 'Teslarati');
 
-      expect(() async => await spaceflightApi.article('foo'), throwsA(isA<ServerException>()));
+
     });
   });
 }

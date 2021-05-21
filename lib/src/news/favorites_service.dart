@@ -1,44 +1,52 @@
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:spaceflight_news/src/news/new.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:spaceflight_news/src/news/model/new.dart';
+import 'package:spaceflight_news/src/news/news_repository.dart';
 
 /// Class that stores in [SharedPreferences] a List of id's of the [New] that
 /// the user marked as favorite.
-class FavoritesService {
-  final SharedPreferences _sharedPreferences;
-  List<String> favorites;
+class FavoritesService extends ChangeNotifier {
+  final NewsRepository _newsRepo;
+  Future<List<New>?> favorites;
 
-  FavoritesService(this._sharedPreferences) : favorites = _sharedPreferences.getStringList(favoritesKey) ?? [];
+  FavoritesService(this._newsRepo) : favorites = _newsRepo.browse();
 
-  static const favoritesKey = 'favorite_new';
-
-  void addFavorite(String id) {
-    if (!favorites.contains(id)) {
-      favorites.add(id);
-      _sharedPreferences.setStringList(favoritesKey, favorites);
+  void addFavorite(New news) async {
+    final currentFavorites = await favorites;
+    if (currentFavorites != null && !currentFavorites.any((element) => element.id == news.id)) {
+      _newsRepo.insert(news);
+      favorites = _newsRepo.browse();
+      notifyListeners();
     }
   }
 
-  void removeFavorite(String id) {
-    if (favorites.remove(id)) {
-      _sharedPreferences.setStringList(favoritesKey, favorites);
+  void removeFavorite(New news) async {
+    final currentFavorites = await favorites;
+
+    if (currentFavorites != null && currentFavorites.any((element) => element.id == news.id)) {
+      _newsRepo.delete(news.id);
+      favorites = _newsRepo.browse();
+      notifyListeners();
     }
   }
 
   /// Method that marks news as favorites depending on if they are in the [FavoritesService]
-  List<New>? markFavorites(List<New>? rawNews) {
+  Future<List<New>?> markFavorites(List<New>? rawNews) async {
     if (rawNews != null && rawNews.isNotEmpty) {
-      var favorites = this.favorites;
+      var favorites = await this.favorites;
+
       for (var article in rawNews) {
-        _isNewFavorite(favorites, article);
+        isNewFavorite(favorites, article);
       }
     }
     return rawNews;
   }
+}
 
-  New _isNewFavorite(List<String> favoritesId, New news) {
-    if (favoritesId.contains(news.id)) {
-      news.isFavorite = true;
-    }
-    return news;
+/// The concept of favorite does not exists in the API so in order to display this information
+/// the incoming [New] that are stored locally as favorites should be marked as such
+New isNewFavorite(List<New>? favorites, New news) {
+  if (favorites != null && favorites.any((element) => element.id == news.id)) {
+    news.isFavorite = true;
   }
+  return news;
 }

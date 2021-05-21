@@ -18,4 +18,9 @@ class ServerException implements Exception {
       stackTrace: error.stackTrace,
     );
   }
+
+  @override
+  String toString() {
+    return 'ServerException{statusCode: $statusCode, message: $message}';
+  }
 }

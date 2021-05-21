@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:spaceflight_news/src/common/api/spaceflight_api.dart';
 import 'package:spaceflight_news/src/news/favorites_service.dart';
-import 'package:spaceflight_news/src/news/new.dart';
+import 'package:spaceflight_news/src/news/model/new.dart';
 
 enum BottomBarItem { feed, favorites }
 
@@ -12,28 +12,25 @@ class FeedViewModel extends ChangeNotifier {
   FeedViewModel({required this.spaceflightApi, required this.favoritesService});
 
   void toggleFavorite(New news) {
+    print(news);
     news.isFavorite = !news.isFavorite;
+    print(news);
     if (news.isFavorite) {
-      favoritesService.addFavorite(news.id);
+      favoritesService.addFavorite(news);
     } else {
-      favoritesService.removeFavorite(news.id);
+      favoritesService.removeFavorite(news);
     }
     notifyListeners();
   }
 
   /// Get a list of all the news that the user has as favorites
   Future<List<New>?> getFavoriteNews() async {
-    var favorites = this.favoritesService.favorites;
-    if (favorites.isEmpty) {
+    var favorites = await this.favoritesService.favorites;
+    if (favorites == null || favorites.isEmpty) {
       return List.empty();
     } else {
-      List<Future<New?>> futureFavoriteArticles = [];
-      for (var favorite in favorites) {
-        futureFavoriteArticles.add(spaceflightApi.article(favorite));
-      }
-      var favoriteArticles = await Future.wait(futureFavoriteArticles);
-      var _favoriteArticles = favoriteArticles.whereType<New>().map(markAsFavorite).toList();
-      return _favoriteArticles;
+      // assert(favorites.every((element) => element.isFavorite));
+      return favorites;
     }
   }
 
@@ -41,7 +38,10 @@ class FeedViewModel extends ChangeNotifier {
   ///the retrieved news that are favorite are marked as such making it's `isFavorite` attribute `true`
   Future<List<New>?> getNews() async {
     var articles = await spaceflightApi.articles();
+    print('getNews inside FeedViewModel');
+    articles?.forEach(print);
 
+    print('getNews inside FeedViewModel');
     return markFavorites(articles);
   }
 
@@ -51,22 +51,16 @@ class FeedViewModel extends ChangeNotifier {
     return markFavorites(articles);
   }
 
-  List<New>? markFavorites(List<New>? rawNews) {
+  Future<List<New>?> markFavorites(List<New>? rawNews) async {
     if (rawNews != null && rawNews.isNotEmpty) {
-      var favorites = this.favoritesService.favorites;
+      var favorites = await this.favoritesService.favorites;
+
       for (var article in rawNews) {
-        _isNewFavorite(favorites, article);
+        isNewFavorite(favorites, article);
       }
     }
 
     return rawNews;
-  }
-
-  New _isNewFavorite(List<String> favoritesId, New news) {
-    if (favoritesId.contains(news.id)) {
-      news.isFavorite = true;
-    }
-    return news;
   }
 }
 
@@ -109,7 +103,9 @@ class SearchBarState extends ChangeNotifier {
 
   void toggle() {
     _isActive = !_isActive;
-    print('SearchBar active is $_isActive');
+
+    if (!_isActive) _searchTerm = null;
+
     notifyListeners();
   }
 }

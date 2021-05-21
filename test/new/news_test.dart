@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:spaceflight_news/src/news/new.dart';
+import 'package:spaceflight_news/src/news/model/new.dart';
 
 void main() {
   setUp(() {});
