@@ -1,12 +1,18 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:spaceflight_news/src/common/api/spaceflight_api.dart';
-import 'package:spaceflight_news/src/common/exceptions.dart';
+import 'package:spaceflight_news/src/environment.dart';
 import 'package:spaceflight_news/src/news/model/new.dart';
 
-const _sampleArticleId = '60a189ddc2ea06001d94fa95';
+class MockApi extends Mock implements SpaceflightApi {}
+
+class MockDio extends Mock implements Dio {}
 
 void main() {
   late SpaceflightApi spaceflightApi;
+  late SpaceflightApi mockApi;
   setUp(() {
     // uncomment for integration testing with external services
     // spaceflightApi = SpaceflightApi(environment: Environment.production());
@@ -26,12 +32,11 @@ void main() {
       }
     });
     test('A single new is fetched from the API', () async {
-      var article = await spaceflightApi.readArticle(_sampleArticleId);
+      var article = await spaceflightApi.readArticle('');
 
       expect(article, isA<New?>());
       expect(article?.newsSite, 'Teslarati');
-
-
     });
   });
+
 }

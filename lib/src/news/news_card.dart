@@ -24,6 +24,7 @@ class NewsCard extends StatelessWidget {
         var screenSize = MediaQuery.of(context).size;
         var boxConstraints = constraints.constrainDimensions(double.infinity, screenSize.height * newsCardHeight);
         return InkWell(
+          key: Key(news.id),
           onTap: () => onCardTapped(context),
           child: ConstrainedBox(
             constraints: BoxConstraints.loose(boxConstraints),

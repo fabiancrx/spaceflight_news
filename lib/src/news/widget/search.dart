@@ -40,6 +40,7 @@ class SearchBar extends HookWidget {
     final textEditingController = controller ?? useTextEditingController();
     final focusNode = useFocusNode();
     return Container(
+      key: Key('searchbar'),
         margin: EdgeInsets.only(left: 16, right: 16, bottom: 20, top: 4),
         padding: EdgeInsets.only(bottom: 0),
         decoration: BoxDecoration(

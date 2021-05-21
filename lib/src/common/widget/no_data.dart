@@ -41,6 +41,7 @@ class NoData extends StatelessWidget {
 
     return Stack(
       fit: StackFit.expand,
+      key: Key('no_data'),
       children: [
         if (isLoading)
           Align(

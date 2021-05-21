@@ -40,7 +40,7 @@ var theme = Provider((_) => AppTheme(isDark: false));
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Configure logging client
+  // Configure logging client just in debug mode
   putLumberdashToWork(withClients: [if (kDebugMode) EmojiLumberdash(printTime: true)]);
 
   Hive.registerAdapter(NewAdapter());

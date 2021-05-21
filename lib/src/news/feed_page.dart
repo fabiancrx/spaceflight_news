@@ -97,6 +97,7 @@ class NewsFeed extends HookWidget {
         search.isActive ? PreferredSize(preferredSize: Size.fromHeight(40), child: SearchBar()) : null;
 
     return Scaffold(
+        key: Key('feed_page'),
         backgroundColor: Theme.of(context).backgroundColor,
         appBar: PreferredSize(
             preferredSize: Size.fromHeight(appBarHeight),
@@ -128,49 +129,82 @@ class NewsFeed extends HookWidget {
                   borderRadius: const BorderRadius.only(topRight: Radius.circular(16), topLeft: Radius.circular(16)),
                 ),
                 child: useProvider(newsListProvider).map<Widget>(
-                    data: (data) => _newsList(data.value, subTitle),
+                    data: (data) => _NewsList(data.value, subTitle),
                     loading: (_) => useProvider(_noDataWidgetProvider(true)),
-                    error: (error) => _errorWidget())),
+                    error: (error) => _ErrorWidget())),
           ),
         ));
   }
+}
 
-  Widget _errorWidget() => Center(
-      child: Container(
-          child: Icon(Icons.clear, size: 80, color: Color(0xffd1d4db)),
-          width: 160,
-          height: 160,
-          decoration: BoxDecoration(color: Color(0xffF3F4F6), shape: BoxShape.circle)));
+class _NewsList extends HookWidget {
+  final List<New>? news;
+  final String subtitle;
 
-  _newsList(List<New>? news, String subtitle) {
-    if (news == null || news.isEmpty) {
+  const _NewsList(
+    this.news,
+    this.subtitle, {
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    if (news == null || news!.isEmpty) {
       return useProvider(_noDataWidgetProvider(false));
     }
-    return Column(
-      children: [
-        Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 24, left: 18, top: 20),
-            child: Text(subtitle, style: TextStyles.h2),
-          ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: ListView(
-              shrinkWrap: false,
-              children: [
-                for (var i = 0; i < news.length; i++) ...[
-                  if (i > 0) const SizedBox(height: 16),
-                  NewsCard(news: news[i]),
-                ],
-              ],
+    return RefreshIndicator(
+      onRefresh: () {
+        return context.refresh(newsListProvider);
+      },
+      child: Column(
+        key: Key('news_list_data'),
+        children: [
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 24, left: 18, top: 20),
+              child: Text(subtitle, style: TextStyles.h2),
             ),
           ),
-        )
-      ],
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: ListView(
+                shrinkWrap: false,
+                children: [
+                  for (var i = 0; i < news!.length; i++) ...[
+                    if (i > 0) const SizedBox(height: 16),
+                    NewsCard(news: news![i]),
+                  ],
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
     );
+  }
+}
+
+class _ErrorWidget extends StatelessWidget {
+  const _ErrorWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+triggerMode: RefreshIndicatorTriggerMode.anywhere,
+      onRefresh: () {
+        return context.refresh(newsListProvider);
+      },
+      child: Center(
+          key: Key('news_list_error'),
+          child: Container(
+              child: Icon(Icons.clear, size: 80, color: Color(0xffd1d4db)),
+              width: 160,
+              height: 160,
+              decoration: BoxDecoration(color: Color(0xffF3F4F6), shape: BoxShape.circle))),
+    );
+    ;
   }
 }
 
