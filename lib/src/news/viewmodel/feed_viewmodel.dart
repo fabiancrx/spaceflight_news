@@ -24,13 +24,23 @@ class FeedViewModel extends ChangeNotifier {
   }
 
   /// Get a list of all the news that the user has as favorites
-  Future<List<New>?> getFavoriteNews() async {
+  Future<List<New>?> getFavoriteNews([String? searchTerm]) async {
     var favorites = await this.favoritesService.favorites;
     if (favorites == null || favorites.isEmpty) {
       return List.empty();
     } else {
-      // assert(favorites.every((element) => element.isFavorite));
-      return favorites;
+      assert(favorites.every((element) => element.isFavorite));
+
+      if (searchTerm != null) {
+        // convert to lowerCase to do case insensitive matching
+        return favorites
+            .where((element) => element.title.toLowerCase().contains(
+                  searchTerm.toLowerCase(),
+                ))
+            .toList();
+      } else {
+        return favorites;
+      }
     }
   }
 
@@ -38,10 +48,6 @@ class FeedViewModel extends ChangeNotifier {
   ///the retrieved news that are favorite are marked as such making it's `isFavorite` attribute `true`
   Future<List<New>?> getNews() async {
     var articles = await spaceflightApi.articles();
-    print('getNews inside FeedViewModel');
-    articles?.forEach(print);
-
-    print('getNews inside FeedViewModel');
     return markFavorites(articles);
   }
 

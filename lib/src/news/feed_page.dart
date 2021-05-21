@@ -34,7 +34,7 @@ final newsListProvider = FutureProvider<List<New>?>((ref) {
         case BottomBarItem.feed:
           return _feedViewModel.search(search.searchTerm!);
         case BottomBarItem.favorites:
-          return _feedViewModel.getFavoriteNews();
+          return _feedViewModel.getFavoriteNews(search.searchTerm);
       }
     }
     return Future.value([]);
@@ -130,12 +130,17 @@ class NewsFeed extends HookWidget {
                 child: useProvider(newsListProvider).map<Widget>(
                     data: (data) => _newsList(data.value, subTitle),
                     loading: (_) => useProvider(_noDataWidgetProvider(true)),
-                    error: (error) => Center(
-                          child: Text(error.toString()),
-                        ))),
+                    error: (error) => _errorWidget())),
           ),
         ));
   }
+
+  Widget _errorWidget() => Center(
+      child: Container(
+          child: Icon(Icons.clear, size: 80, color: Color(0xffd1d4db)),
+          width: 160,
+          height: 160,
+          decoration: BoxDecoration(color: Color(0xffF3F4F6), shape: BoxShape.circle)));
 
   _newsList(List<New>? news, String subtitle) {
     if (news == null || news.isEmpty) {
