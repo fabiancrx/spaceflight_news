@@ -50,7 +50,7 @@ void main() async {
 
   runApp(ProviderScope(
     overrides: [
-      // api.overrideWithValue(FakeSpaceflight()),//Uncomment this line to mock the API
+      api.overrideWithValue(FakeSpaceflight()),//Uncomment this line to mock the API
       persistence.overrideWithValue(box),
     ],
     child: Consumer(

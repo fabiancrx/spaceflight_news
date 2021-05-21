@@ -32,7 +32,7 @@ dependencies:
 
   # User Interface
   google_fonts: ^2.1.0
-
+  animations: ^2.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

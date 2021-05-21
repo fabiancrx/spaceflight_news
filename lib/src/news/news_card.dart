@@ -19,50 +19,55 @@ class NewsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        var screenSize = MediaQuery.of(context).size;
-        var boxConstraints = constraints.constrainDimensions(double.infinity, screenSize.height * newsCardHeight);
-        return InkWell(
-          key: Key(news.id),
-          onTap: () => onCardTapped(context),
-          child: ConstrainedBox(
-            constraints: BoxConstraints.loose(boxConstraints),
-            child: Stack(
-              children: [
-                Container(
-                  foregroundDecoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(16)),
-                    image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: NetworkImage(news.imageUrl),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 0,
-                  width: constraints.maxWidth,
-                  child: Card(
-                    margin: EdgeInsets.zero,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 2,
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(news.title, style: TextStyles.caption1),
-                          SizedBox(height: 12),
-                          DateRow(news: news),
-                        ],
+    return OpenContainerWrapper(
+      openedWidget: NewsDetail(news: news),
+      closedBuilder: (BuildContext _, VoidCallback openContainer) {
+        return LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            var screenSize = MediaQuery.of(context).size;
+            var boxConstraints = constraints.constrainDimensions(double.infinity, screenSize.height * newsCardHeight);
+            return InkWell(
+              key: Key(news.id),
+              onTap: openContainer,
+              child: ConstrainedBox(
+                constraints: BoxConstraints.loose(boxConstraints),
+                child: Stack(
+                  children: [
+                    Container(
+                      foregroundDecoration: BoxDecoration(
+                        borderRadius: const BorderRadius.all(Radius.circular(16)),
+                        image: DecorationImage(
+                          fit: BoxFit.cover,
+                          image: NetworkImage(news.imageUrl),
+                        ),
                       ),
                     ),
-                  ),
+                    Positioned(
+                      bottom: 0,
+                      width: constraints.maxWidth,
+                      child: Card(
+                        margin: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 2,
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(news.title, style: TextStyles.caption1),
+                              SizedBox(height: 12),
+                              DateRow(news: news),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );

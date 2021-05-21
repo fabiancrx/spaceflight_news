@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 
 class PlaceHolderNetworkImage extends StatelessWidget {
@@ -38,6 +39,30 @@ class PlaceHolderNetworkImage extends StatelessWidget {
           curve: Curves.easeOut,
         );
       },
+    );
+  }
+}
+
+class OpenContainerWrapper extends StatelessWidget {
+  const OpenContainerWrapper({
+    required this.closedBuilder,
+    required this.openedWidget,
+    this.transitionType = ContainerTransitionType.fade,
+  });
+
+  final Widget openedWidget;
+  final CloseContainerBuilder closedBuilder;
+  final ContainerTransitionType transitionType;
+
+  @override
+  Widget build(BuildContext context) {
+    return OpenContainer<bool>(
+      transitionType: transitionType,
+      openBuilder: (BuildContext context, VoidCallback _) {
+        return openedWidget;
+      },
+      tappable: false,
+      closedBuilder: closedBuilder,
     );
   }
 }
