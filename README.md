@@ -1,9 +1,9 @@
 # spaceflight_news 🚀
 
-A News app built with [Flutter][flutter_link] and uses the [Spaceflight API] [spaceflight_link]
+A News app built with [Flutter][flutter_link] and uses the [Spaceflight API][spaceflight_link]
 
-![Home Screen][home_screen]
-![Search][home_screen]
+<img src="https://raw.github.com/fabiancrx/spaceflight_news/master/art/home.jpg" height="50%" width="50%" alt="News screen" />
+<img src="https://raw.github.com/fabiancrx/spaceflight_news/master/art/search.jpg" style="float:right" height="50%" width="50%" alt="Search screen" />
 
 ### Offline Favorites 📴
 

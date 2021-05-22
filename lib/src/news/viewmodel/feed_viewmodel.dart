@@ -12,9 +12,8 @@ class FeedViewModel extends ChangeNotifier {
   FeedViewModel({required this.spaceflightApi, required this.favoritesService});
 
   void toggleFavorite(New news) {
-    print(news);
     news.isFavorite = !news.isFavorite;
-    print(news);
+
     if (news.isFavorite) {
       favoritesService.addFavorite(news);
     } else {
@@ -46,8 +45,8 @@ class FeedViewModel extends ChangeNotifier {
 
   /// The difference from this method and [SpaceflightApi].articles() is that
   ///the retrieved news that are favorite are marked as such making it's `isFavorite` attribute `true`
-  Future<List<New>?> getNews({int? limit, int? offset,String? term}) async {
-    var articles = await spaceflightApi.articles(start: offset, limit: limit,searchTerm: term);
+  Future<List<New>?> getNews({int? limit, int? offset, String? term}) async {
+    var articles = await spaceflightApi.articles(start: offset, limit: limit, searchTerm: term);
     return markFavorites(articles);
   }
 
