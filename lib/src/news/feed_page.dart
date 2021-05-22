@@ -5,12 +5,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:spaceflight_news/main.dart';
-import 'package:spaceflight_news/resources/resources.dart';
 import 'package:spaceflight_news/src/common/extensions.dart';
 import 'package:spaceflight_news/src/common/theme.dart';
 import 'package:spaceflight_news/src/common/widget/no_data.dart';
 import 'package:spaceflight_news/src/news/model/new.dart';
 import 'package:spaceflight_news/src/news/viewmodel/feed_viewmodel.dart';
+import 'package:spaceflight_news/src/news/widget/no_data_adapters.dart';
 import 'package:spaceflight_news/src/news/widget/search.dart';
 
 import 'news_card.dart';
@@ -94,11 +94,13 @@ class NewsFeed extends HookWidget {
     }
 
     final PreferredSizeWidget? bottomAppBarWidget =
-        search.isActive ? PreferredSize(preferredSize: Size.fromHeight(40), child: SearchBar()) : null;
+    search.isActive ? PreferredSize(preferredSize: Size.fromHeight(40), child: SearchBar()) : null;
 
     return Scaffold(
         key: Key('feed_page'),
-        backgroundColor: Theme.of(context).backgroundColor,
+        backgroundColor: Theme
+            .of(context)
+            .backgroundColor,
         appBar: PreferredSize(
             preferredSize: Size.fromHeight(appBarHeight),
             child: AppBar(
@@ -108,8 +110,13 @@ class NewsFeed extends HookWidget {
               brightness: Brightness.light,
               backwardsCompatibility: false,
               systemOverlayStyle: SystemUiOverlayStyle(
-                  statusBarColor: Theme.of(context).backgroundColor,
-                  statusBarIconBrightness: Theme.of(context).brightness.invert()),
+                  statusBarColor: Theme
+                      .of(context)
+                      .backgroundColor,
+                  statusBarIconBrightness: Theme
+                      .of(context)
+                      .brightness
+                      .invert()),
               actions: [
                 IconButton(icon: Icon(search.isActive ? Icons.clear : Icons.search, size: 24), onPressed: search.toggle)
               ],
@@ -117,7 +124,9 @@ class NewsFeed extends HookWidget {
             )),
         bottomNavigationBar: BottomNavBar(),
         body: Container(
-          color: Theme.of(context).primaryColor,
+          color: Theme
+              .of(context)
+              .primaryColor,
           child: ClipRRect(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(16),
@@ -125,7 +134,9 @@ class NewsFeed extends HookWidget {
             ),
             child: Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).backgroundColor,
+                  color: Theme
+                      .of(context)
+                      .backgroundColor,
                   borderRadius: const BorderRadius.only(topRight: Radius.circular(16), topLeft: Radius.circular(16)),
                 ),
                 child: useProvider(newsListProvider).map<Widget>(
@@ -141,11 +152,10 @@ class _NewsList extends HookWidget {
   final List<New>? news;
   final String subtitle;
 
-  const _NewsList(
-    this.news,
-    this.subtitle, {
-    Key? key,
-  }) : super(key: key);
+  const _NewsList(this.news,
+      this.subtitle, {
+        Key? key,
+      }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -200,7 +210,6 @@ class _ErrorWidget extends StatelessWidget {
               height: 160,
               decoration: BoxDecoration(color: Color(0xffF3F4F6), shape: BoxShape.circle))),
     );
-
   }
 }
 
@@ -242,71 +251,5 @@ class BottomNavBar extends ConsumerWidget {
             onTap: bottomBar.changeIndex,
           ),
         ));
-  }
-}
-
-class NoNews extends StatelessWidget {
-  final bool isLoading;
-
-  const NoNews({Key? key, this.isLoading = false}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return NoData(isLoading: isLoading, image: AssetImage(AssetIcon.notFoundNew), text: context.l10n.noNewsYet);
-  }
-}
-
-class NoSearchResults extends StatelessWidget {
-  final bool isLoading;
-
-  const NoSearchResults({Key? key, this.isLoading = false}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return NoData(
-      image: AssetImage(AssetIcon.notFoundSearch),
-      isLoading: isLoading,
-      text: context.l10n.searchNoResults,
-      child: Text(
-        context.l10n.searchAnotherWord,
-        style: TextStyles.body2.copyWith(color: OnePlaceColor.gray800),
-      ),
-    );
-  }
-}
-
-class NoFavorites extends StatelessWidget {
-  final bool isLoading;
-
-  const NoFavorites({Key? key, this.isLoading = false}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return NoData(
-      image: AssetImage(AssetIcon.notFoundHeart),
-      isLoading: isLoading,
-      text: context.l10n.favoritesNoResults,
-      child: Row(
-        children: [
-          Text(
-            context.l10n.favoriteTapOnThe,
-            style: TextStyles.body2.copyWith(color: OnePlaceColor.gray800),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Icon(
-              Icons.favorite_border,
-              color: Theme.of(context).primaryColor,
-              size: 20,
-            ),
-          ),
-          Text(
-            context.l10n.favoriteToMarkAnItemAsFavorite,
-            style: TextStyles.body2.copyWith(color: OnePlaceColor.gray800),
-          )
-        ],
-        mainAxisAlignment: MainAxisAlignment.center,
-      ),
-    );
   }
 }

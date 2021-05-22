@@ -40,6 +40,7 @@ class SpaceflightApi {
         if (limit != null) "_limit": '$limit',
         if (start != null) "_start": '$start',
         if (searchTerm != null) "title_contains": '$searchTerm',
+        "_limit": '50',
       },
     );
 
