@@ -21,10 +21,11 @@ class SpaceflightApi {
     }
   }
 
+  static const pageSize = 10;
+
   Future<Response> _get(Future<Response> request) async {
     try {
       final response = await request;
-      logMessage('$response', extras: {'status': '${response.statusCode}'});
       return response;
     } on DioError catch (error, st) {
       logError(error, stacktrace: st);
@@ -32,25 +33,18 @@ class SpaceflightApi {
     }
   }
 
-  Future<List<New>?> articles({int? limit, int? offset}) async {
-    StringBuffer baseQuery = StringBuffer('articles');
-    if (limit != null) baseQuery.write('$baseQuery?_limit=$limit');
-    if (offset != null) baseQuery.write('$baseQuery?_offset=$offset');
+  Future<List<New>?> articles({int? limit, int? start, String? searchTerm}) async {
+    final uri = _environment.uri.replace(
+      path: '${_environment.uri.path}articles',
+      queryParameters: <String, Object>{
+        if (limit != null) "_limit": '$limit',
+        if (start != null) "_start": '$start',
+        if (searchTerm != null) "title_contains": '$searchTerm',
+      },
+    );
 
-    final response = await _get(_client.get(baseQuery.toString()));
-    if (response.statusCode == 200) {
-      final decodedArticles = response.data as List;
-      final news = decodedArticles.map((e) => New.fromJson(e)).toList(growable: false);
+    final response = await _get(_client.getUri(uri));
 
-      for (final article in news) {
-        _newsCache[article.id] = article;
-      }
-      return news;
-    }
-  }
-
-  Future<List<New>?> search(String searchTerm) async {
-    final response = await _get(_client.get('articles?title_contains=$searchTerm'));
     if (response.statusCode == 200) {
       final decodedArticles = response.data as List;
       final news = decodedArticles.map((e) => New.fromJson(e)).toList(growable: false);
@@ -84,15 +78,14 @@ class FakeSpaceflight extends SpaceflightApi {
     return Future.value(New.fromJson(jsonDecode(singleNews)));
   }
 
-  @override
-  Future<List<New>> search(String searchTerm) async {
+  Future<List<New>> _search(String searchTerm) async {
     final allNews = await articles();
     return allNews.where((element) => element.title.contains(searchTerm)).toList();
   }
 
   @override
-  Future<List<New>> articles({int? limit, int? offset}) async {
-
+  Future<List<New>> articles({int? limit, int? start, String? searchTerm}) async {
+    if (searchTerm != null) return _search(searchTerm);
     final decodedArticles = jsonDecode(newsJson) as List;
     final List<New> news = decodedArticles.map<New>((e) => New.fromJson(e)).toList(growable: false);
     return news;

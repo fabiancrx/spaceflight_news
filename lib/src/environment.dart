@@ -1,18 +1,18 @@
 /// Class in which the configuration settings of the app are stored.
 // It is used for encapsulating and injecting different configurations to the app at runtime
 class Environment {
-  final String url;
+  final Uri uri;
   final bool production;
 
-  const Environment({required this.url, required this.production});
+  const Environment({required this.production, required this.uri});
+
+  String get url => uri.toString();
 
   factory Environment.production() => Environment(
-        url: 'https://spaceflightnewsapi.net/api/v2/',
-        production: true,
-      );
+      production: true,
+      uri: Uri(scheme: 'https', host: 'spaceflightnewsapi.net', path: '/api/v2/'));
 
   factory Environment.testing() => Environment(
-        url: 'https://test.spaceflightnewsapi.net/api/v2/',
-        production: false,
-      );
+      production: false,
+      uri: Uri(scheme: 'https', host: 'test.spaceflightnewsapi.net', path: '/api/v2/'));
 }

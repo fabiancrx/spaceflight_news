@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:emoji_lumberdash/emoji_lumberdash.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -47,23 +49,25 @@ void main() async {
 
   await Hive.initFlutter();
   var box = await Hive.openBox<New>('spaceflight');
-
-  runApp(ProviderScope(
-    overrides: [
-      api.overrideWithValue(FakeSpaceflight()),//Uncomment this line to mock the API
-      persistence.overrideWithValue(box),
-    ],
-    child: Consumer(
-      builder: (_, watch, child) {
-        return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            onGenerateTitle: (BuildContext context) => context.l10n.appTitle,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            theme: watch(theme).themeData,
-            home: child);
-      },
-      child: NewsFeed(),
-    ),
-  ));
+  runZonedGuarded(
+    () => runApp(ProviderScope(
+      overrides: [
+        // api.overrideWithValue(FakeSpaceflight()),//Uncomment this line to mock the API
+        persistence.overrideWithValue(box),
+      ],
+      child: Consumer(
+        builder: (_, watch, child) {
+          return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              onGenerateTitle: (BuildContext context) => context.l10n.appTitle,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              theme: watch(theme).themeData,
+              home: child);
+        },
+        child: NewsFeed(),
+      ),
+    )),
+    (error, stackTrace) => logError(error.toString(), stacktrace: stackTrace),
+  );
 }

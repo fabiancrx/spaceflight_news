@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:spaceflight_news/main.dart';
 import 'package:spaceflight_news/resources/resources.dart';
+import 'package:spaceflight_news/src/common/api/spaceflight_api.dart';
 import 'package:spaceflight_news/src/common/extensions.dart';
 import 'package:spaceflight_news/src/common/theme.dart';
 import 'package:spaceflight_news/src/common/widget/no_data.dart';
@@ -32,7 +33,7 @@ final newsListProvider = FutureProvider<List<New>?>((ref) {
     if (search.searchTerm != null) {
       switch (tab.state) {
         case BottomBarItem.feed:
-          return _feedViewModel.search(search.searchTerm!);
+          return _feedViewModel.getNews(term: search.searchTerm!);
         case BottomBarItem.favorites:
           return _feedViewModel.getFavoriteNews(search.searchTerm);
       }
@@ -152,6 +153,7 @@ class _NewsList extends HookWidget {
     if (news == null || news!.isEmpty) {
       return useProvider(_noDataWidgetProvider(false));
     }
+
     return RefreshIndicator(
       onRefresh: () {
         return context.refresh(newsListProvider);
@@ -171,12 +173,7 @@ class _NewsList extends HookWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: ListView(
                 shrinkWrap: false,
-                children: [
-                  for (var i = 0; i < news!.length; i++) ...[
-                    if (i > 0) const SizedBox(height: 16),
-                    NewsCard(news: news![i]),
-                  ],
-                ],
+                children: [for (var i = 0; i < news!.length; i++) NewsCard(news: news![i])],
               ),
             ),
           )
@@ -192,7 +189,7 @@ class _ErrorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
-triggerMode: RefreshIndicatorTriggerMode.anywhere,
+      triggerMode: RefreshIndicatorTriggerMode.anywhere,
       onRefresh: () {
         return context.refresh(newsListProvider);
       },

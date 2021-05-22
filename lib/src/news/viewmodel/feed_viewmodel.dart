@@ -46,14 +46,8 @@ class FeedViewModel extends ChangeNotifier {
 
   /// The difference from this method and [SpaceflightApi].articles() is that
   ///the retrieved news that are favorite are marked as such making it's `isFavorite` attribute `true`
-  Future<List<New>?> getNews() async {
-    var articles = await spaceflightApi.articles();
-    return markFavorites(articles);
-  }
-
-  Future<List<New>?> search(String term) async {
-    var articles = await spaceflightApi.search(term);
-
+  Future<List<New>?> getNews({int? limit, int? offset,String? term}) async {
+    var articles = await spaceflightApi.articles(start: offset, limit: limit,searchTerm: term);
     return markFavorites(articles);
   }
 
