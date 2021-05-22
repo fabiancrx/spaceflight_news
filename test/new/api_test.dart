@@ -1,9 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:spaceflight_news/src/common/api/spaceflight_api.dart';
-import 'package:spaceflight_news/src/environment.dart';
 import 'package:spaceflight_news/src/news/model/new.dart';
 
 class MockApi extends Mock implements SpaceflightApi {}

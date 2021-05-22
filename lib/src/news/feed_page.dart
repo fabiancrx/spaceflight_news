@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:spaceflight_news/main.dart';
 import 'package:spaceflight_news/resources/resources.dart';
-import 'package:spaceflight_news/src/common/api/spaceflight_api.dart';
 import 'package:spaceflight_news/src/common/extensions.dart';
 import 'package:spaceflight_news/src/common/theme.dart';
 import 'package:spaceflight_news/src/common/widget/no_data.dart';
@@ -201,7 +200,7 @@ class _ErrorWidget extends StatelessWidget {
               height: 160,
               decoration: BoxDecoration(color: Color(0xffF3F4F6), shape: BoxShape.circle))),
     );
-    ;
+
   }
 }
 
