@@ -3,7 +3,7 @@ name: flutter App Release
 
 on:
   push:
-    branches: [master,release]
+    branches: []
 
 jobs:
   version:
