@@ -25,7 +25,7 @@ dependencies:
   dio: ^4.0.0
 
   # State Management
-  hooks_riverpod: ^1.0.1
+  hooks_riverpod: ^2.0.0-dev.5
 
   # logging
   emoji_lumberdash: 2.0.0
