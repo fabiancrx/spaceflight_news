@@ -30,11 +30,10 @@ void main() {
       }
     });
     test('A single new is fetched from the API', () async {
-      var article = await spaceflightApi.readArticle('');
+      var article = await spaceflightApi.readArticle('14795');
 
       expect(article, isA<New?>());
       expect(article?.newsSite, 'Teslarati');
     });
   });
-
 }

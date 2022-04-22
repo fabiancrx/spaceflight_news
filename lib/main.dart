@@ -56,13 +56,13 @@ void main() async {
         persistence.overrideWithValue(box),
       ],
       child: Consumer(
-        builder: (_, watch, child) {
+        builder: (_, ref, child) {
           return MaterialApp(
               debugShowCheckedModeBanner: false,
               onGenerateTitle: (BuildContext context) => context.l10n.appTitle,
               localizationsDelegates: AppLocalizations.localizationsDelegates,
               supportedLocales: AppLocalizations.supportedLocales,
-              theme: watch(theme).themeData,
+              theme: ref.watch(theme).themeData,
               home: child);
         },
         child: NewsFeed(),

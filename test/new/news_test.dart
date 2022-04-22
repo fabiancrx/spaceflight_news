@@ -16,7 +16,7 @@ void main() {
   setUp(() {});
   group('News Model', () {
     test('News Model is correctly serialized and deserialized', () {
-      var testNew = New.fromJson(jsonDecode(_newsJson));
+      var testNew = New.fromJson(jsonDecode(_newsJson) as Map<String, dynamic>);
 
       expect(testNew, isA<New>());
       expect(testNew.toJson()..remove('favorite'), jsonDecode(_newsJson),
@@ -53,7 +53,6 @@ void main() {
     expect(find.byKey(Key('searchbar')), findsOneWidget);
     expect(find.byKey(Key('no_data')), findsOneWidget);
   });
-
 }
 
 class MockBox<T> extends Fake implements Box<T> {

@@ -26,7 +26,7 @@ class NewsCard extends StatelessWidget {
         return Padding(
           padding: EdgeInsets.only(bottom: 16),
           child: InkWell(
-            key: Key(news.id),
+            key: Key('${news.id}'),
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) {
                 return NewsDetail(news: news);
@@ -82,13 +82,13 @@ class NewsCard extends StatelessWidget {
   }
 }
 
-class DateRow extends StatelessWidget {
+class DateRow extends ConsumerWidget {
   final New news;
 
   const DateRow({Key? key, required this.news}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
     Widget favorite =
         news.isFavorite ? Image.asset(AssetIcon.favoriteSelected) : Image.asset(AssetIcon.favoriteOutlineGray);
 
@@ -101,7 +101,7 @@ class DateRow extends StatelessWidget {
         ),
         InkWell(
           onTap: () {
-            context.read(feedViewModel.notifier).toggleFavorite(news);
+            ref.read(feedViewModel.notifier).toggleFavorite(news);
           },
           child: favorite,
         ),
@@ -110,14 +110,14 @@ class DateRow extends StatelessWidget {
   }
 }
 
-class NewsDetail extends StatelessWidget {
+class NewsDetail extends ConsumerWidget {
   final New news;
 
   const NewsDetail({Key? key, required this.news}) : super(key: key);
   static const double _appBarSize = 64;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     var size = MediaQuery.of(context).size;
     return Scaffold(
         backgroundColor: Theme.of(context).backgroundColor,
@@ -175,7 +175,7 @@ class NewsDetail extends StatelessWidget {
                         ),
                         SizedBox(height: 12),
                         Consumer(builder: (context, watch, child) {
-                          var feed = watch(feedViewModel);
+                          var feed = ref.watch(feedViewModel);
                           return DateRow(news: news);
                         }),
                         SizedBox(height: 44),

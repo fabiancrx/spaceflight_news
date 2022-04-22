@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:spaceflight_news/main.dart';
@@ -68,15 +68,15 @@ final _noDataWidgetProvider = Provider.family<Widget, bool>((ref, isLoading) {
   }
 });
 
-class NewsFeed extends HookWidget {
+class NewsFeed extends HookConsumerWidget {
   const NewsFeed({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    var bottomBar = useProvider(_currentBottomBarTabProvider);
-    var _feedViewModel = useProvider(feedViewModel);
+  Widget build(BuildContext context, WidgetRef ref) {
+    var bottomBar = ref.watch(_currentBottomBarTabProvider);
+    var _feedViewModel = ref.watch(feedViewModel);
 
-    var search = useProvider(searchBarProvider);
+    var search = ref.watch(searchBarProvider);
     double appBarHeight = 64 + (search.isActive ? 60 : 0);
 
     late String title;
@@ -94,13 +94,11 @@ class NewsFeed extends HookWidget {
     }
 
     final PreferredSizeWidget? bottomAppBarWidget =
-    search.isActive ? PreferredSize(preferredSize: Size.fromHeight(40), child: SearchBar()) : null;
+        search.isActive ? PreferredSize(preferredSize: Size.fromHeight(40), child: SearchBar()) : null;
 
     return Scaffold(
         key: Key('feed_page'),
-        backgroundColor: Theme
-            .of(context)
-            .backgroundColor,
+        backgroundColor: Theme.of(context).backgroundColor,
         appBar: PreferredSize(
             preferredSize: Size.fromHeight(appBarHeight),
             child: AppBar(
@@ -110,13 +108,8 @@ class NewsFeed extends HookWidget {
               brightness: Brightness.light,
               backwardsCompatibility: false,
               systemOverlayStyle: SystemUiOverlayStyle(
-                  statusBarColor: Theme
-                      .of(context)
-                      .backgroundColor,
-                  statusBarIconBrightness: Theme
-                      .of(context)
-                      .brightness
-                      .invert()),
+                  statusBarColor: Theme.of(context).backgroundColor,
+                  statusBarIconBrightness: Theme.of(context).brightness.invert()),
               actions: [
                 IconButton(icon: Icon(search.isActive ? Icons.clear : Icons.search, size: 24), onPressed: search.toggle)
               ],
@@ -124,9 +117,7 @@ class NewsFeed extends HookWidget {
             )),
         bottomNavigationBar: BottomNavBar(),
         body: Container(
-          color: Theme
-              .of(context)
-              .primaryColor,
+          color: Theme.of(context).primaryColor,
           child: ClipRRect(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(16),
@@ -134,38 +125,37 @@ class NewsFeed extends HookWidget {
             ),
             child: Container(
                 decoration: BoxDecoration(
-                  color: Theme
-                      .of(context)
-                      .backgroundColor,
+                  color: Theme.of(context).backgroundColor,
                   borderRadius: const BorderRadius.only(topRight: Radius.circular(16), topLeft: Radius.circular(16)),
                 ),
-                child: useProvider(newsListProvider).map<Widget>(
+                child: ref.watch(newsListProvider).map<Widget>(
                     data: (data) => _NewsList(data.value, subTitle),
-                    loading: (_) => useProvider(_noDataWidgetProvider(true)),
+                    loading: (_) => ref.watch(_noDataWidgetProvider(true)),
                     error: (error) => _ErrorWidget())),
           ),
         ));
   }
 }
 
-class _NewsList extends HookWidget {
+class _NewsList extends HookConsumerWidget {
   final List<New>? news;
   final String subtitle;
 
-  const _NewsList(this.news,
-      this.subtitle, {
-        Key? key,
-      }) : super(key: key);
+  const _NewsList(
+    this.news,
+    this.subtitle, {
+    Key? key,
+  }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (news == null || news!.isEmpty) {
-      return useProvider(_noDataWidgetProvider(false));
+      return ref.watch(_noDataWidgetProvider(false));
     }
 
     return RefreshIndicator(
       onRefresh: () {
-        return context.refresh(newsListProvider);
+        return ref.refresh(newsListProvider.future);
       },
       child: Column(
         key: Key('news_list_data'),
@@ -192,15 +182,15 @@ class _NewsList extends HookWidget {
   }
 }
 
-class _ErrorWidget extends StatelessWidget {
+class _ErrorWidget extends ConsumerWidget {
   const _ErrorWidget({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return RefreshIndicator(
       triggerMode: RefreshIndicatorTriggerMode.anywhere,
       onRefresh: () {
-        return context.refresh(newsListProvider);
+        return ref.refresh(newsListProvider.future);
       },
       child: Center(
           key: Key('news_list_error'),
@@ -217,8 +207,8 @@ class BottomNavBar extends ConsumerWidget {
   const BottomNavBar({Key? key}) : super(key: key);
 
   @override
-  Widget build(context, watch) {
-    var bottomBar = watch(_currentBottomBarTabProvider);
+  Widget build(context, WidgetRef ref) {
+    var bottomBar = ref.watch(_currentBottomBarTabProvider);
 
     return Container(
         decoration: BoxDecoration(
@@ -233,7 +223,7 @@ class BottomNavBar extends ConsumerWidget {
             topRight: Radius.circular(16),
           ),
           child: BottomNavigationBar(
-            backgroundColor: watch(theme).tabBackground,
+            backgroundColor: ref.watch(theme).tabBackground,
             unselectedItemColor: OnePlaceColor.gray400,
             unselectedLabelStyle: TextStyles.tab3Inactive,
             selectedLabelStyle: TextStyles.tab3Active,

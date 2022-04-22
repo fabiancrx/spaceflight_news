@@ -1,9 +1,10 @@
 import 'package:hive/hive.dart';
 part 'new.g.dart';
+
 @HiveType(typeId: 1)
 class New {
   @HiveField(0)
-  final String id;
+  final int id;
   @HiveField(1)
   final bool featured;
   @HiveField(2)
@@ -34,15 +35,15 @@ class New {
   });
 
   factory New.fromJson(Map<String, dynamic> json) => New(
-        id: json["id"] ?? '',
-        featured: json["featured"],
-        title: json["title"],
-        url: json["url"],
-        imageUrl: json["imageUrl"],
-        newsSite: json["newsSite"],
-        summary: json["summary"],
-        isFavorite: json["favorite"] ?? false,
-        publishedAt: DateTime.parse(json["publishedAt"]),
+        id: json["id"] as int,
+        featured: json["featured"] as bool? ?? false,
+        title: json["title"] as String,
+        url: json["url"] as String,
+        imageUrl: json["imageUrl"] as String,
+        newsSite: json["newsSite"] as String,
+        summary: json["summary"] as String,
+        isFavorite: json["favorite"] as bool? ?? false,
+        publishedAt: DateTime.parse(json["publishedAt"] as String),
       );
 
   Map<String, dynamic> toJson() => {

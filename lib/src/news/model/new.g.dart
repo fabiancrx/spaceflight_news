@@ -17,7 +17,7 @@ class NewAdapter extends TypeAdapter<New> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return New(
-      id: fields[0] as String,
+      id: fields[0] as int,
       featured: fields[1] as bool,
       title: fields[2] as String,
       url: fields[3] as String,

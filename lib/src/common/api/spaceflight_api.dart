@@ -43,15 +43,14 @@ class SpaceflightApi {
         "_limit": '50',
       },
     );
-
     final response = await _get(_client.getUri(uri));
 
     if (response.statusCode == 200) {
       final decodedArticles = response.data as List;
-      final news = decodedArticles.map((e) => New.fromJson(e)).toList(growable: false);
+      final news = decodedArticles.map((e) => New.fromJson(e as Map<String, dynamic>)).toList(growable: false);
 
       for (final article in news) {
-        _newsCache[article.id] = article;
+        _newsCache['${article.id}'] = article;
       }
       return news;
     }
@@ -65,7 +64,7 @@ class SpaceflightApi {
     final response = await _get(_client.get('articles/$id'));
     if (response.statusCode == 200) {
       final decodedArticle = response.data;
-      final article = New.fromJson(decodedArticle);
+      final article = New.fromJson(decodedArticle as Map<String, dynamic>);
       return article;
     }
   }
@@ -76,7 +75,7 @@ class FakeSpaceflight extends SpaceflightApi {
 
   @override
   Future<New> readArticle(String id) async {
-    return Future.value(New.fromJson(jsonDecode(singleNews)));
+    return Future.value(New.fromJson(jsonDecode(singleNews) as Map<String, dynamic>));
   }
 
   Future<List<New>> _search(String searchTerm) async {
@@ -88,7 +87,7 @@ class FakeSpaceflight extends SpaceflightApi {
   Future<List<New>> articles({int? limit, int? start, String? searchTerm}) async {
     if (searchTerm != null) return _search(searchTerm);
     final decodedArticles = jsonDecode(newsJson) as List;
-    final List<New> news = decodedArticles.map<New>((e) => New.fromJson(e)).toList(growable: false);
+    final news = decodedArticles.map<New>((e) => New.fromJson(e as Map<String, dynamic>)).toList(growable: false);
     return news;
   }
 

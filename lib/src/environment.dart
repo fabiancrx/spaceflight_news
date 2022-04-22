@@ -8,11 +8,9 @@ class Environment {
 
   String get url => uri.toString();
 
-  factory Environment.production() => Environment(
-      production: true,
-      uri: Uri(scheme: 'https', host: 'spaceflightnewsapi.net', path: '/api/v2/'));
+  factory Environment.production() =>
+      Environment(production: true, uri: Uri(scheme: 'https', host: 'api.spaceflightnewsapi.net', path: '/v3/'));
 
-  factory Environment.testing() => Environment(
-      production: false,
-      uri: Uri(scheme: 'https', host: 'test.spaceflightnewsapi.net', path: '/api/v2/'));
+  factory Environment.testing() =>
+      Environment(production: false, uri: Uri(scheme: 'https', host: 'test.spaceflightnewsapi.net', path: '/v3/'));
 }

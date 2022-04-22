@@ -19,7 +19,7 @@ class NewsRepository {
   }
 
 // remove favorite new
-  Future<void> delete(String id) async {
+  Future<void> delete(int id) async {
     await _box.delete(id);
   }
 }

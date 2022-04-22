@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:spaceflight_news/src/common/theme.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spaceflight_news/src/news/feed_page.dart';
 
 /// Listens to textEditingController, but debounce updates to avoid triggering too many HTTP requests.
@@ -30,17 +30,17 @@ String useDebouncedSearch(TextEditingController textEditingController, [int mill
   return search.value;
 }
 
-class SearchBar extends HookWidget {
+class SearchBar extends HookConsumerWidget {
   final TextEditingController? controller;
 
   const SearchBar({this.controller, Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
     final textEditingController = controller ?? useTextEditingController();
     final focusNode = useFocusNode();
     return Container(
-      key: Key('searchbar'),
+        key: Key('searchbar'),
         margin: EdgeInsets.only(left: 16, right: 16, bottom: 20, top: 4),
         padding: EdgeInsets.only(bottom: 0),
         decoration: BoxDecoration(
@@ -51,7 +51,7 @@ class SearchBar extends HookWidget {
           focusNode: focusNode,
           onSubmitted: (value) {
             focusNode.unfocus();
-            context.read(searchBarProvider).searchTerm = textEditingController.text;
+            ref.read(searchBarProvider).searchTerm = textEditingController.text;
           },
           cursorColor: Colors.white,
           cursorHeight: 23,
